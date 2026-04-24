@@ -1,0 +1,39 @@
+# secrets
+.env
+*.env.local
+
+# persistent data (bind-mounted into containers)
+data/
+
+# agent state machine runtime artifacts
+agent/running/
+agent/plan/
+agent/build/
+agent/test/
+agent/review/
+agent/done/
+agent/error/
+!agent/**/.gitkeep
+*.lock
+
+# target repos (cloned or generated, not source of truth for this repo)
+target-repos/*/node_modules/
+target-repos/*/dist/
+target-repos/*/.env
+
+# execution error reports
+errors/*.md
+!errors/.gitkeep
+
+# logs
+*.log
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# n8n workflow backups
+n8n-workflows/*.bak

@@ -1,0 +1,39 @@
+# LiteLLM Proxy config — Phase 0 baseline.
+# - Langfuse callbacks are intentionally disabled here; we will enable them in
+#   Phase 4 after Langfuse is initialized and PUBLIC/SECRET keys exist in .env.
+# - Model routing + provider fallback live here (single source of truth; n8n
+#   workflows only ever talk to this proxy, never to vendor APIs directly).
+
+model_list:
+  - model_name: plan-model
+    litellm_params:
+      model: deepseek/deepseek-chat
+      api_key: os.environ/DEEPSEEK_API_KEY
+
+  - model_name: plan-model-backup
+    litellm_params:
+      model: openai/abab6.5s-chat
+      api_base: https://api.minimax.chat/v1
+      api_key: os.environ/MINIMAX_API_KEY
+
+  - model_name: review-model
+    litellm_params:
+      model: deepseek/deepseek-reasoner
+      api_key: os.environ/DEEPSEEK_API_KEY
+
+router_settings:
+  fallbacks:
+    - plan-model: ["plan-model-backup"]
+  num_retries: 2
+  timeout: 60
+
+litellm_settings:
+  # success_callback: ["langfuse"]   # enable in Phase 4
+  # failure_callback: ["langfuse"]   # enable in Phase 4
+  drop_params: true
+  max_budget: 2.0
+  budget_duration: 24h
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  database_url: os.environ/DATABASE_URL
