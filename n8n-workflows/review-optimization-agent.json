@@ -1,0 +1,57 @@
+{
+  "id": "review-optimization-agent",
+  "name": "Review & Optimization Agent",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "c3e12d84-b2d0-4fc9-8a6c-0e84c7f2f9ae",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const fs = require('fs');\nreturn await eval(`(async () => {${fs.readFileSync('/files/workflows/review-optimization-agent.n8n.js', 'utf8')}\\n})()`);"
+      },
+      "id": "e7f4b3a1-c8d2-4e56-9f3b-2a1c0d8e7f6b",
+      "name": "Run Review Optimization Agent",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 300]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Run Review Optimization Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "versionId": "9a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+  "triggerCount": 0,
+  "tags": []
+}

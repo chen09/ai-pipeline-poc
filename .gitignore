@@ -6,6 +6,7 @@
 data/
 
 # agent state machine runtime artifacts
+agent/inbox/*
 agent/running/*
 agent/plan/*
 agent/build/*
@@ -13,6 +14,7 @@ agent/test/*
 agent/review/*
 agent/done/*
 agent/error/*
+!agent/inbox/
 !agent/running/
 !agent/plan/
 !agent/build/
@@ -27,6 +29,8 @@ agent/error/*
 target-repos/*/node_modules/
 target-repos/*/dist/
 target-repos/*/.env
+
+agent/archive/
 
 # execution error reports
 errors/*.md

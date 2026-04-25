@@ -1,0 +1,63 @@
+{
+  "id": "planning-agent",
+  "name": "Planning Agent",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "b15d5cb1-37e8-4ad6-b161-724c52cf76b1",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const fs = require('fs');\nreturn await eval(`(async () => {${fs.readFileSync('/files/workflows/planning-agent.n8n.js', 'utf8')}\n})()`);"
+      },
+      "id": "4f6863c9-98f8-499b-bd20-c6526b534d06",
+      "name": "Run Planning Agent",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Run Planning Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "versionId": "3e0ac3be-f039-4ccd-bd7b-72848106531c",
+  "triggerCount": 0,
+  "tags": []
+}

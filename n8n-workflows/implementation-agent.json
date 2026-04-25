@@ -1,0 +1,63 @@
+{
+  "id": "implementation-agent",
+  "name": "Implementation Agent",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "f7a7de7d-620d-47f4-ae20-f9da5206509f",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const fs = require('fs');\nreturn await eval(`(async () => {${fs.readFileSync('/files/workflows/implementation-agent.n8n.js', 'utf8')}\\n})()`);"
+      },
+      "id": "f8f6de10-a130-47cc-b3f2-8e27ff96008b",
+      "name": "Run Implementation Agent",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Run Implementation Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "versionId": "86286cc0-6f4d-4478-a6ea-5fe675e059f0",
+  "triggerCount": 0,
+  "tags": []
+}

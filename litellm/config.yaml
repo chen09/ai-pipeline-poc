@@ -1,6 +1,7 @@
-# LiteLLM Proxy config — Phase 0 baseline.
-# - Langfuse callbacks are intentionally disabled here; we will enable them in
-#   Phase 4 after Langfuse is initialized and PUBLIC/SECRET keys exist in .env.
+# LiteLLM Proxy config — Phase 4.
+# - Langfuse callbacks are ENABLED. Keys are read from LANGFUSE_PUBLIC_KEY /
+#   LANGFUSE_SECRET_KEY in .env (set after manually signing up at localhost:3000).
+#   If keys are empty, LiteLLM logs a warning but does not crash.
 # - Model routing + provider fallback live here (single source of truth; n8n
 #   workflows only ever talk to this proxy, never to vendor APIs directly).
 
@@ -28,8 +29,8 @@ router_settings:
   timeout: 60
 
 litellm_settings:
-  # success_callback: ["langfuse"]   # enable in Phase 4
-  # failure_callback: ["langfuse"]   # enable in Phase 4
+  success_callback: ["langfuse"]
+  failure_callback: ["langfuse"]
   drop_params: true
   max_budget: 2.0
   budget_duration: 24h

@@ -51,11 +51,28 @@ Then open:
 - LiteLLM:  <http://localhost:4000/health/liveliness>
 - MinIO:    <http://localhost:9091>  (user: see `.env` `MINIO_ROOT_USER`)
 
+## Seed vs Runtime (Important)
+
+- `fixtures/seed_tasks/` is the **Git-managed source-of-truth** for sample tasks.
+- `agent/inbox/` is **runtime queue state** and is intentionally ignored by Git.
+- To load seeds into the runtime inbox:
+
+```bash
+./scripts/load_seed_tasks.sh
+```
+
+If `agent/inbox/` already contains task files and you want to replace them:
+
+```bash
+./scripts/load_seed_tasks.sh --force
+```
+
 ## Directory Layout
 
 ```
 .
 ├── agent/              # task state-machine (Phase 1+)
+├── fixtures/           # git-managed seed task inputs
 ├── data/               # persistent storage for all services (gitignored)
 ├── docker-compose.yml
 ├── docs/               # reports, schemas, conventions

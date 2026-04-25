@@ -153,6 +153,9 @@ services:
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
       MINIMAX_API_KEY: ${MINIMAX_API_KEY}
       MINIMAX_GROUP_ID: ${MINIMAX_GROUP_ID}
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY}
+      LANGFUSE_HOST: http://langfuse-web:3000
     volumes:
       - ./litellm/config.yaml:/app/config.yaml:ro
     ports:
@@ -187,6 +190,7 @@ services:
       QUEUE_BULL_REDIS_PORT: 6379
       QUEUE_BULL_REDIS_PASSWORD: ${REDIS_PASSWORD}
       QUEUE_BULL_REDIS_DB: 1
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY}
       N8N_BASIC_AUTH_ACTIVE: "true"
       N8N_BASIC_AUTH_USER: ${N8N_BASIC_AUTH_USER}
       N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD}
@@ -196,8 +200,10 @@ services:
       GENERIC_TIMEZONE: UTC
       N8N_RUNNERS_ENABLED: "true"
       N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
+      NODE_FUNCTION_ALLOW_BUILTIN: fs,path,os,http,url,child_process
     volumes:
       - ./data/n8n:/home/node/.n8n
+      - ./.env:/files/.env:ro
       - ./agent:/files/agent
       - ./n8n-workflows:/files/workflows
       - ./target-repos:/files/target-repos
@@ -220,6 +226,7 @@ services:
     environment: *n8n-env
     volumes:
       - ./data/n8n:/home/node/.n8n
+      - ./.env:/files/.env:ro
       - ./agent:/files/agent
       - ./n8n-workflows:/files/workflows
       - ./target-repos:/files/target-repos
