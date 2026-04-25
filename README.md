@@ -1,5 +1,12 @@
 # AI Pipeline POC
 
+> **🤖 如何开启一个新的 Agent 对话？**
+> 每次在这个项目中新开 Cursor Agent 对话时，请直接复制并发送以下这句话：
+> 
+> ```text
+> 当你开始一个新任务时，你必须（MUST）主动阅读 docs/HANDOFF.md 和 PLAN.md 来获取现状和下一步目标。不要去瞎猜项目背景。
+> ```
+
 Local-first, multi-agent AI development pipeline. See [PLAN.md](PLAN.md) for the full design document.
 
 **Project root**: `/Volumes/WDC2T/Project/ai-pipeline-poc/`
