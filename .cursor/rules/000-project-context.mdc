@@ -1,0 +1,18 @@
+---
+description: Auto-read project context and handoff on every new task or chat
+globs: *
+---
+# Always Read the Handoff First
+
+When starting a new task, chat, or agent session in this project, you MUST proactively read the following files to understand the current architecture, progress, and rules:
+
+1. `docs/HANDOFF.md` (Current state and next steps)
+2. `PLAN.md` (The high-level roadmap and exit criteria)
+
+For specific architectural constraints when editing workflows or agent code, also consult:
+- `agent/README.md` (Artifact-driven Multi-Agent feedback loop)
+- `docs/task-schema.md` (State machine fields and step enums)
+- `docs/idempotency.md` (Lock recovery, archiving, and idempotency rules)
+- `docs/RESEARCH_REFERENCES.md` (Academic background for the POC)
+
+Do NOT guess the project context. Always rely on these documentation files as the source of truth.
