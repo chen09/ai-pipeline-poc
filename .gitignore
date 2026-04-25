@@ -6,13 +6,20 @@
 data/
 
 # agent state machine runtime artifacts
-agent/running/
-agent/plan/
-agent/build/
-agent/test/
-agent/review/
-agent/done/
-agent/error/
+agent/running/*
+agent/plan/*
+agent/build/*
+agent/test/*
+agent/review/*
+agent/done/*
+agent/error/*
+!agent/running/
+!agent/plan/
+!agent/build/
+!agent/test/
+!agent/review/
+!agent/done/
+!agent/error/
 !agent/**/.gitkeep
 *.lock
 
