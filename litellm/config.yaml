@@ -12,8 +12,8 @@ model_list:
 
   - model_name: plan-model-backup
     litellm_params:
-      model: openai/abab6.5s-chat
-      api_base: https://api.minimax.chat/v1
+      model: openai/MiniMax-M2.7
+      api_base: https://api.minimaxi.com/v1
       api_key: os.environ/MINIMAX_API_KEY
 
   - model_name: review-model
