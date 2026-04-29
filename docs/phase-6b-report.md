@@ -1,7 +1,7 @@
 # Phase 6B Report Template — Backend A/B Metrics
 
 **Date**: 2026-04-29  
-**Status**: Checkpoint `...104` accepted after scoped verification  
+**Status**: Checkpoint `...105` accepted after scoped verification  
 **Scope**: Compare implementation backends behind the same artifact contract.
 
 ## Backend Variants
@@ -9,7 +9,7 @@
 | Variant | Backend | Status | Notes |
 | --- | --- | --- | --- |
 | A | `cursor` | Baseline available | OpenClaw Gateway -> `cursor_agent` |
-| B | `codex` | Smoke checkpoint evidence captured (`...102`-`...104`) | Local Runner `codex` adapter executed end-to-end with terminal `completed` across checkpoints |
+| B | `codex` | Smoke checkpoint evidence captured (`...102`-`...105`) | Local Runner `codex` adapter executed end-to-end with terminal `completed` across checkpoints |
 | C | `claude` | Deferred | Requires confirmed access and cost acceptance |
 
 ## First Live Smoke Slice
@@ -97,6 +97,37 @@
 - **Checkpoint decision**:
   - `01PH6BABSMOKE000000000104` is closed/accepted.
 
+## Checkpoint `...105` Evidence
+
+- **Parent / child IDs**:
+  - parent: `01PH6BABSMOKE000000000105`
+  - cursor: `01PH6BABCURSOR000000000105`
+  - codex: `01PH6BABCODEX000000000105`
+- **Guard outputs before seed**:
+  - `agent/running`, `agent/inbox`, `agent/fanout/staged` had no non-`.gitkeep` entries
+  - no active `queued|claimed|running` rows across `agent/jobs/*.status.json`
+  - `command -v codex` succeeded
+- **Seed + bounded watch summary**:
+  - runtime seed succeeded for parent `...105`
+  - codex child reached terminal first (`completed`)
+  - cursor child reached terminal during bounded watch (`completed`)
+  - no reseed performed in this round
+- **Triad consistency**:
+  - both children include `.status.json`, `.result.json`, `.completion.json`
+  - status/result/completion content agrees on successful completion and blocker=`none`
+- **Completion health**:
+  - both children terminal `completed`
+  - `error_message` null/empty
+  - blocker `none`
+- **Endpoint + focused test evidence**:
+  - codex endpoint: `/phase6b-ab-codex-105`, test: `tests/phase6b-ab-codex-105.test.js`
+  - cursor endpoint: `/phase6b-ab-cursor-105`, test: `tests/phase6b-ab-cursor-105.test.js`
+  - route declarations present in `target-repos/api/src/index.js`
+- **Quality gate**:
+  - `npm test` in `target-repos/api` -> pass (`23` files, `24` tests)
+- **Checkpoint decision**:
+  - `01PH6BABSMOKE000000000105` is closed/accepted.
+
 ## Run Configuration
 
 - Target repo snapshot:
@@ -110,16 +141,16 @@
 
 | Backend | Tasks | Done | Error | Test Pass | Review Pass | Manual Interventions | Avg E2E Latency | Avg Cost |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `cursor` | 3 | 3 | 0 | pass | pending manual review | 0 | in-band smoke | n/a |
-| `codex` | 3 | 3 | 0 | pass | pending manual review | 0 | in-band smoke | n/a |
+| `cursor` | 4 | 4 | 0 | pass | pending manual review | 0 | in-band smoke | n/a |
+| `codex` | 4 | 4 | 0 | pass | pending manual review | 0 | in-band smoke | n/a |
 | `claude` | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD |
 
 ## Failure Classification
 
 | Backend | Failure Class | Count | Notes |
 | --- | --- | ---: | --- |
-| `cursor` | none (checkpoints `...102`-`...104`) | 0 | completed via continuous runner watch |
-| `codex` | none (checkpoints `...102`-`...104`) | 0 | completed via continuous runner watch |
+| `cursor` | none (checkpoints `...102`-`...105`) | 0 | completed via continuous runner watch |
+| `codex` | none (checkpoints `...102`-`...105`) | 0 | completed via continuous runner watch |
 | `claude` | TBD | TBD | TBD |
 
 ## Per-Task Results
@@ -132,6 +163,8 @@
 | `01PH6BABCODEX000000000103` | `codex` | completed | pass | pending manual review | `target-repos/api/src/index.js`, `target-repos/api/tests/phase6b-ab-codex-103.test.js` | completion artifact and result agree on blocker=`none` |
 | `01PH6BABCURSOR000000000104` | `cursor` | completed | pass | pending manual review | `target-repos/api/src/index.js`, `target-repos/api/tests/phase6b-ab-cursor-104.test.js` | completion artifact and result agree on blocker=`none` |
 | `01PH6BABCODEX000000000104` | `codex` | completed | pass | pending manual review | `target-repos/api/src/index.js`, `target-repos/api/tests/phase6b-ab-codex-104.test.js` | completion artifact and result agree on blocker=`none` |
+| `01PH6BABCURSOR000000000105` | `cursor` | completed | pass | pending manual review | `target-repos/api/src/index.js`, `target-repos/api/tests/phase6b-ab-cursor-105.test.js` | completion artifact and result agree on blocker=`none` |
+| `01PH6BABCODEX000000000105` | `codex` | completed | pass | pending manual review | `target-repos/api/src/index.js`, `target-repos/api/tests/phase6b-ab-codex-105.test.js` | completion artifact and result agree on blocker=`none` |
 
 ## Decision
 
@@ -140,14 +173,15 @@ Checkpoint decisions:
 - `01PH6BABSMOKE000000000102`: accepted as first clean Phase 6B A/B smoke checkpoint candidate.
 - `01PH6BABSMOKE000000000103`: **closed/accepted** after scoped verification in this round.
 - `01PH6BABSMOKE000000000104`: **closed/accepted** after follow-up completion watch and quality-gate verification.
+- `01PH6BABSMOKE000000000105`: **closed/accepted** after bounded watch, triad consistency checks, and quality-gate pass.
 
 ## Next Slice Readiness (Proposal Only)
 
-- Candidate parent id placeholder: `01PH6BABSMOKE000000000105`
+- Candidate parent id placeholder: `01PH6BABSMOKE000000000106`
 - Preconditions before authorizing next slice:
   - continuous runner consumer confirmed active at slice start,
   - guard checks clean (`running/inbox/fanout-staged`, active status scan, codex availability),
-  - checkpoints `...102`-`...104` evidence accepted by codex review.
+  - checkpoints `...102`-`...105` evidence accepted by codex review.
 
 ## Open Questions
 
