@@ -12,6 +12,9 @@ test("codex adapter invokes CLI and parses completion artifact", async () => {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-adapter-"));
   const previousExecutable = process.env.CODEX_EXECUTABLE;
   const previousSandbox = process.env.CODEX_SANDBOX;
+  const previousPlanMaxChars = process.env.CODEX_PLAN_MAX_CHARS;
+  const previousTestPlanMaxChars = process.env.CODEX_TEST_PLAN_MAX_CHARS;
+  const previousTimeoutBufferSeconds = process.env.CODEX_TIMEOUT_BUFFER_SECONDS;
 
   try {
     const projectRoot = tempRoot;
@@ -54,6 +57,9 @@ fs.writeFileSync(outputPath, JSON.stringify(payload), "utf8");
 
     process.env.CODEX_EXECUTABLE = fakeCodexPath;
     process.env.CODEX_SANDBOX = "workspace-write";
+    process.env.CODEX_PLAN_MAX_CHARS = "8";
+    process.env.CODEX_TEST_PLAN_MAX_CHARS = "8";
+    process.env.CODEX_TIMEOUT_BUFFER_SECONDS = "5";
 
     const requestPayload = {
       task_id: "T-CODEX-001",
@@ -80,16 +86,26 @@ fs.writeFileSync(outputPath, JSON.stringify(payload), "utf8");
 
     const prompt = fs.readFileSync(capturedPromptPath, "utf8");
     assert.match(prompt, /TASK_BRIEF: implement feature X/);
-    assert.match(prompt, /PLAN_CONTENT: add endpoint/);
-    assert.match(prompt, /TEST_PLAN_CONTENT: add test/);
+    assert.match(prompt, /\[truncated to 8 chars via CODEX_PLAN_MAX_CHARS\]/);
+    assert.match(prompt, /\[truncated to 8 chars via CODEX_TEST_PLAN_MAX_CHARS\]/);
     assert.match(prompt, new RegExp(paths.targetRepoAbs.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
     assert.match(prompt, /IMPLEMENTATION_RESULT:T-CODEX-001/);
-    assert.ok(events.some((item) => item.event === "codex_exec_start"));
+    const startEvent = events.find((item) => item.event === "codex_exec_start");
+    assert.ok(startEvent);
+    assert.equal(startEvent.data.timeoutBaseSeconds, 30);
+    assert.equal(startEvent.data.timeoutBufferSeconds, 5);
+    assert.equal(startEvent.data.timeoutMs, 35000);
   } finally {
     if (previousExecutable === undefined) delete process.env.CODEX_EXECUTABLE;
     else process.env.CODEX_EXECUTABLE = previousExecutable;
     if (previousSandbox === undefined) delete process.env.CODEX_SANDBOX;
     else process.env.CODEX_SANDBOX = previousSandbox;
+    if (previousPlanMaxChars === undefined) delete process.env.CODEX_PLAN_MAX_CHARS;
+    else process.env.CODEX_PLAN_MAX_CHARS = previousPlanMaxChars;
+    if (previousTestPlanMaxChars === undefined) delete process.env.CODEX_TEST_PLAN_MAX_CHARS;
+    else process.env.CODEX_TEST_PLAN_MAX_CHARS = previousTestPlanMaxChars;
+    if (previousTimeoutBufferSeconds === undefined) delete process.env.CODEX_TIMEOUT_BUFFER_SECONDS;
+    else process.env.CODEX_TIMEOUT_BUFFER_SECONDS = previousTimeoutBufferSeconds;
     fs.rmSync(tempRoot, { recursive: true, force: true });
   }
 });

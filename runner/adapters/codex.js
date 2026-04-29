@@ -4,6 +4,44 @@ const fs = require("fs");
 const path = require("path");
 const { execSync, spawn } = require("child_process");
 
+function readPositiveIntEnv(name, fallback) {
+  const raw = process.env[name];
+  if (!raw || !raw.trim()) return fallback;
+  const value = Number(raw);
+  if (!Number.isFinite(value) || value < 0) return fallback;
+  return Math.floor(value);
+}
+
+function tailText(value, maxChars) {
+  const text = String(value || "");
+  if (!maxChars || text.length <= maxChars) return text;
+  return text.slice(-maxChars);
+}
+
+function truncateForPrompt(text, maxChars, envName) {
+  const raw = String(text || "");
+  if (!maxChars || raw.length <= maxChars) return raw;
+  const note = `\n\n[truncated to ${maxChars} chars via ${envName}]`;
+  return `${raw.slice(0, maxChars)}${note}`;
+}
+
+function resolveCodexExecutable() {
+  const configured = process.env.CODEX_EXECUTABLE;
+  if (configured && configured.trim()) return configured.trim();
+  if (process.platform === "darwin") {
+    const candidates = [
+      "/Volumes/WDC2T/Applications/Codex.app/Contents/Resources/codex",
+      "/Applications/Codex.app/Contents/Resources/codex",
+      "/Volumes/WDC2T/Applications/Codex.app/Contents/MacOS/Codex",
+      "/Applications/Codex.app/Contents/MacOS/Codex",
+    ];
+    for (const candidate of candidates) {
+      if (fs.existsSync(candidate)) return candidate;
+    }
+  }
+  return "codex";
+}
+
 function gitChangedFiles(targetRepoAbs, targetRepoRel) {
   let output = "";
   try {
@@ -56,6 +94,16 @@ function parseCompletion(raw, fallbackChangedFiles) {
 
 function buildPrompt(requestPayload, completionPath) {
   const marker = `IMPLEMENTATION_RESULT:${requestPayload.task_id}`;
+  const planContent = truncateForPrompt(
+    requestPayload.plan_content,
+    readPositiveIntEnv("CODEX_PLAN_MAX_CHARS", 0),
+    "CODEX_PLAN_MAX_CHARS",
+  );
+  const testPlanContent = truncateForPrompt(
+    requestPayload.test_plan_content,
+    readPositiveIntEnv("CODEX_TEST_PLAN_MAX_CHARS", 0),
+    "CODEX_TEST_PLAN_MAX_CHARS",
+  );
   return `You are the implementation backend for a local multi-agent POC.
 
 You are executing in repo:
@@ -88,10 +136,10 @@ Task brief:
 ${requestPayload.task_brief}
 
 Plan:
-${requestPayload.plan_content}
+${planContent}
 
 Test plan:
-${requestPayload.test_plan_content}
+${testPlanContent}
 `;
 }
 
@@ -151,10 +199,13 @@ function runCodexExec(executable, args, prompt, timeoutMs) {
 }
 
 async function run(requestPayload, paths, logger) {
-  const executable = process.env.CODEX_EXECUTABLE || "codex";
-  const sandbox = process.env.CODEX_SANDBOX || "workspace-write";
+  const executable = resolveCodexExecutable();
+  const sandbox = process.env.CODEX_SANDBOX || "danger-full-access";
   const timeoutSeconds = Number(requestPayload.timeout_seconds || 300);
-  const timeoutMs = (Number.isFinite(timeoutSeconds) ? timeoutSeconds : 300) * 1000;
+  const timeoutBase = Number.isFinite(timeoutSeconds) && timeoutSeconds > 0 ? Math.floor(timeoutSeconds) : 300;
+  const timeoutBufferSeconds = readPositiveIntEnv("CODEX_TIMEOUT_BUFFER_SECONDS", 0);
+  const timeoutMs = (timeoutBase + timeoutBufferSeconds) * 1000;
+  const stderrTailChars = readPositiveIntEnv("CODEX_STDERR_TAIL_CHARS", 4000);
   const jobsDir = path.join(paths.projectRoot, "agent", "jobs");
   const completionPath = path.join(jobsDir, `${requestPayload.task_id}.completion.json`);
   const prompt = buildPrompt({
@@ -178,13 +229,18 @@ async function run(requestPayload, paths, logger) {
     jobsDir,
     "--sandbox",
     sandbox,
-    "--ask-for-approval",
-    "never",
     "--output-last-message",
     completionPath,
     "-",
   ];
-  logger.info("codex_exec_start", { executable, args, completionPath, timeoutMs });
+  logger.info("codex_exec_start", {
+    executable,
+    args,
+    completionPath,
+    timeoutMs,
+    timeoutBaseSeconds: timeoutBase,
+    timeoutBufferSeconds,
+  });
 
   const proc = await runCodexExec(executable, args, prompt, timeoutMs);
 
@@ -202,7 +258,7 @@ async function run(requestPayload, paths, logger) {
       exit_code: 3,
       error_message: message,
       details: {
-        stderr: String(proc.stderr || "").slice(-4000),
+        stderr: tailText(proc.stderr, stderrTailChars),
       },
     };
   }
@@ -216,7 +272,7 @@ async function run(requestPayload, paths, logger) {
       exit_code: 124,
       error_message: "codex_exec_timeout",
       details: {
-        stderr: String(proc.stderr || "").slice(-4000),
+        stderr: tailText(proc.stderr, stderrTailChars),
       },
     };
   }
@@ -224,7 +280,7 @@ async function run(requestPayload, paths, logger) {
   if (proc.status !== 0) {
     logger.error("codex_exec_nonzero", {
       status: proc.status,
-      stderr: String(proc.stderr || "").slice(-4000),
+      stderr: tailText(proc.stderr, stderrTailChars),
     });
     return {
       state: "failed",
@@ -233,7 +289,7 @@ async function run(requestPayload, paths, logger) {
       exit_code: Number(proc.status || 3),
       error_message: "codex_exec_nonzero",
       details: {
-        stderr: String(proc.stderr || "").slice(-4000),
+        stderr: tailText(proc.stderr, stderrTailChars),
       },
     };
   }
