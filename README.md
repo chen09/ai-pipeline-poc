@@ -11,7 +11,7 @@ Local-first, multi-agent AI development pipeline. See [PLAN.md](PLAN.md) for the
 
 **Project root**: `/Volumes/WDC2T/Project/ai-pipeline-poc/`
 
-## Architecture (Phase 0)
+## Architecture (Current / Phase 6E+)
 
 Nine Docker services, all data bind-mounted into `./data/`:
 
@@ -26,6 +26,11 @@ Nine Docker services, all data bind-mounted into `./data/`:
 | `litellm`         | 4000             | LLM gateway (routing + fallback)        |
 | `langfuse-web`    | 3000             | Observability UI                        |
 | `langfuse-worker` | —                | Background ingestion for langfuse       |
+
+Execution path for coding tasks:
+
+- `n8n Implementation Agent` -> `agent/jobs` request -> `Local Runner` -> `OpenClaw/cursor_agent` adapter -> `agent/jobs` result
+- Local Runner acts as the local execution control plane; OpenClaw/cursor_agent is the default backend adapter.
 
 ## Prerequisites
 
@@ -67,11 +72,36 @@ If `agent/inbox/` already contains task files and you want to replace them:
 ./scripts/load_seed_tasks.sh --force
 ```
 
+## Local Runner Tuning (Phase 6E+)
+
+For long-running Cursor/OpenClaw jobs, the local runner and the Implementation Agent
+now use heartbeat + watchdog controls through environment variables:
+
+- `LOCAL_RUNNER_HEARTBEAT_MS` (default: `15000`)
+  - Runner-side heartbeat interval.
+  - While a job is `running`, the runner refreshes `agent/jobs/{task_id}.status.json`
+    `updated_at` at this interval.
+- `LOCAL_RUNNER_STALE_RUNNING_SECONDS` (default: `900`)
+  - Workflow-side stale-running watchdog threshold.
+  - If a job remains `running` without heartbeat progress beyond this threshold,
+    the Implementation Agent writes timeout `result.json` / `status.json` to force deterministic convergence.
+
+Recommended tuning:
+
+- Stable local environment: keep defaults.
+- Slow model/tool path: increase `LOCAL_RUNNER_STALE_RUNNING_SECONDS` first.
+- High observability needs: decrease `LOCAL_RUNNER_HEARTBEAT_MS` moderately (avoid too frequent file writes).
+
+`runner/runner.js` also normalizes terminal `changed_files` to project-relative
+paths under `target-repos/...` for consistent downstream aggregation.
+
 ## Directory Layout
 
 ```
 .
-├── agent/              # task state-machine (Phase 1+)
+├── agent/              # task/artifact state-machine
+│   ├── jobs/           # Local Runner request/status/result artifacts
+│   └── comms/          # temporary agent discussion notes, not runtime input
 ├── fixtures/           # git-managed seed task inputs
 ├── data/               # persistent storage for all services (gitignored)
 ├── docker-compose.yml
@@ -81,6 +111,7 @@ If `agent/inbox/` already contains task files and you want to replace them:
 ├── Makefile            # up / down / ps / logs / reset
 ├── n8n-workflows/      # exported workflow JSONs (Phase 2+)
 ├── PLAN.md             # full design document
+├── runner/             # Local Implementation Runner and backend adapters
 ├── scripts/            # bootstrap, init SQL, seed helpers
 └── target-repos/       # repos under test (Phase 3+)
 ```
@@ -97,4 +128,9 @@ make reset             # stop + wipe data/ (interactive confirm)
 
 ## Phase Roadmap
 
-See [PLAN.md](PLAN.md) for detailed phase breakdown. Phase 0 (this phase) only brings up infrastructure. No agent workflows are active yet.
+The current baseline is Phase 6E: Local Runner owns implementation state through `agent/jobs/`, while OpenClaw/cursor_agent is the default backend adapter. See [docs/HANDOFF.md](docs/HANDOFF.md) and [docs/phase-6e-report.md](docs/phase-6e-report.md) for current status. Backend A/B is preparation-only until a second real backend and non-interactive execution path are confirmed.
+
+## Integration Notes for Tutorials
+
+- n8n + OpenClaw Gateway joint-debugging runbook:
+  - [docs/n8n-openclaw-integration-runbook.md](docs/n8n-openclaw-integration-runbook.md)

@@ -4,6 +4,13 @@
 > **Project root**: `/Volumes/WDC2T/Project/ai-pipeline-poc/`
 > **Execution rule**: Do phases IN ORDER. Each TODO is atomic. Verify Exit Criteria before moving to next phase. If blocked, write `errors/phase-<N>-step-<X>.md` and halt.
 
+## Current Status Override (2026-04-29)
+
+- Phase 6E is implemented and validated: Local Runner owns implementation job state through `agent/jobs/`, and OpenClaw/cursor_agent is the default backend adapter.
+- Phase 5 remains a pre-6E baseline; keep it for historical convergence/fallback evidence, not as the current implementation-success proxy.
+- Backend A/B execution is pending; preparation may proceed only after docs are synchronized and a second real backend has confirmed access plus a non-interactive path.
+- For current handoff truth, reconcile this plan with `docs/HANDOFF.md` and `agent/comms/decision-log.md`.
+
 ---
 
 ## 0. Context
@@ -30,7 +37,9 @@ Before committing to expensive models (Codex/Claude) or a complex multi-agent fr
 - LiteLLM = single LLM ingress (provider routing + fallback + budget)
 - Langfuse = single observability backend
 - File system = state machine (markdown files with YAML frontmatter)
-- OpenClaw = execution layer (Cursor stays as the human-facing IDE)
+- **Local Implementation Runner** = execution control plane; owns `agent/jobs/` artifacts as the single source of truth for implementation job status
+- OpenClaw Gateway / `cursor_agent` = one pluggable backend adapter for the Local Runner (not the state source)
+- HermesAgent / Codex / Claude = alternative backend adapters behind the same runner contract
 
 ---
 
@@ -44,6 +53,8 @@ The POC is DONE when ALL of these are true:
 - Killing one `n8n-worker` mid-flight does not corrupt or lose a task
 - Model fallback works: revoking DeepSeek key → Minimax takes over automatically
 - Total POC run cost ≤ $2 on real APIs
+
+Current re-baseline note: the original criteria above remain the canonical POC target. Under the Phase 6E runner path, strict acceptance still needs an explicit 10-task runner-path run, three consecutive Compose restart cycles, Langfuse/cost completeness check, and total cost rollup. Prior evidence exists for n8n-worker mid-flight chaos and model fallback.
 
 ---
 
@@ -63,7 +74,14 @@ Host: macOS
 │   ├── test/       test logs
 │   ├── review/     review notes
 │   ├── done/       success
-│   └── error/      failure (with retry history)
+│   ├── error/      failure (with retry history)
+│   └── jobs/       Local Runner job artifacts ({task_id}.request/status/result.json)
+├── runner/                    # Local Implementation Runner (Phase 6E+)
+│   ├── runner.js              # main entry: reads jobs/, dispatches to backend adapters
+│   ├── adapters/
+│   │   ├── cursor-openclaw.js # backend adapter: OpenClaw -> cursor_agent
+│   │   └── hermes.js          # backend adapter: HermesAgent (future)
+│   └── schemas/               # job request/status/result JSON schemas
 ├── target-repos/              # the code we operate on
 │   └── api/                   # POC single repo (Node.js)
 ├── n8n-workflows/             # exported workflow JSONs (version-controlled)
@@ -91,7 +109,10 @@ inbox/task_X.md
   → Planning Agent:                POST plan-model   → plan/task_X.plan.md
   → Test Generation Agent:         POST plan-model   → test/task_X.test-plan.md
   (TDD gate: Implementation Agent reads plan + test-plan; refuses to start without test-plan)
-  → Implementation Agent:          openclaw run      → build/task_X.build.md
+  → Implementation Agent:          writes `agent/jobs/{task_id}.request.json` for Local Runner
+  Local Runner:                    claims job, invokes backend adapter (cursor-openclaw / hermes / …)
+                                   writes `agent/jobs/{task_id}.status.json` + `agent/jobs/{task_id}.result.json`
+  → n8n polls result:              reads `result.json` → writes `build/{task_id}.build.md`
   → Execution & Analysis Agent:    npm test          → test/task_X.test-run.md
       implementation_failure ──→ Implementation Agent (retry_count++)
       plan_ambiguity         ──→ Planning Agent (revision++)
@@ -111,7 +132,9 @@ inbox/task_X.md
 | Layer         | Tool             | Port | Purpose                              |
 | ------------- | ---------------- | ---- | ------------------------------------ |
 | Orchestrator  | n8n (queue mode) | 5678 | Workflow control                     |
-| Execution     | OpenClaw CLI     | —    | Agent loop                           |
+| Execution     | Local Implementation Runner | —    | Job dispatch; owns status/result artifacts |
+| Backend       | OpenClaw Gateway + `cursor_agent` | 18789 | Backend adapter: local execution routing and coding |
+| Backend (alt) | HermesAgent / Codex / Claude | varies | Pluggable backend adapters (future) |
 | LLM Gateway   | LiteLLM Proxy    | 4000 | Routing, fallback, budget            |
 | Observability | Langfuse         | 3000 | Tracing, cost, eval                  |
 | State DB      | Postgres 16      | 5432 | n8n + langfuse + litellm metadata    |
@@ -365,9 +388,11 @@ execute and verify. Each agent role maps to one n8n workflow.
   2. Execute Command: look for tasks at `current_step: coding` in `running/`
   3. **Gate check**: verify `test/{task_id}.test-plan.md` exists — skip task if absent
   4. Read plan + test-plan as context
-  5. Execute Command (Implementation via OpenClaw):
-    - `openclaw run --repo ../target-repos/api --plan {plan_path} --test-plan {test_plan_path} --output {build_path} --branch task/{task_id}`
-    - Fallback: `scripts/apply_plan.sh` using `claude --print` or manual `needs_human` marker
+  5. Execute Command (Implementation via OpenClaw Gateway RPC):
+    - Connect to `OPENCLAW_GATEWAY_URL` (default `ws://host.docker.internal:18789`) with `OPENCLAW_GATEWAY_TOKEN`
+    - Invoke `cursor_agent` with repo path, task brief, `plan.md`, and `test-plan.md`
+    - Capture structured result: exit status, summary, changed files, and execution logs
+    - If gateway is reachable but blocked by auth/origin/device policy, classify as `openclaw_gateway_*` and route to `needs_human`
   6. Capture: exit code, diff summary, any error output
   7. Commit changes in target repo to branch `task/{task_id}`
   8. Write `build/{task_id}.build.md` with: plan ref, test-plan ref, diff path, commit sha, exit code
@@ -496,9 +521,79 @@ extension before Phase 5 bulk testing:
   - Avg cost per task (USD, from Langfuse)
   - Avg latency per step
   - Top 3 failure modes
-  - Recommendation for Phase 6+: pick ONE of (multi-repo expansion | Hermes integration | Codex integration)
+  - Recommendation for Phase 6+: pick ONE of (multi-repo expansion | Hermes integration | alternative backend integration via OpenClaw router)
 
 **Exit Criteria**: `REPORT.md` committed; all containers still healthy; no orphaned tasks.
+
+---
+
+### Phase 6E — Local Implementation Runner / Backend Adapter (Est: 2–3h)
+
+**Goal**: Move implementation job state control from OpenClaw/Hermes into a self-owned local runner.
+n8n only writes a job request and polls local artifacts; the runner owns dispatch, backend interaction, and result writing.
+
+**Context**: Phase 6D proved that artifact persistence within n8n is reliable, but
+completion status from OpenClaw Gateway cannot be queried via a stable RPC.
+Rather than depending on external backend APIs for state, a local runner script becomes
+the single source of truth through `agent/jobs/` files.
+
+#### P6E.1 Create runner contract and schemas
+
+- `mkdir -p agent/jobs runner/adapters runner/schemas`
+- Define `runner/schemas/job-request.schema.json`:
+  - `task_id`, `target_repo`, `backend` (enum: `cursor-openclaw | hermes`), `plan_ref`, `test_plan_ref`, `created_at`
+- Define `runner/schemas/job-status.schema.json`:
+  - `task_id`, `state` (enum: `queued | claimed | running | completed | failed | timeout | cancelled`), `backend`, `started_at`, `updated_at`, `pid`
+- Define `runner/schemas/job-result.schema.json`:
+  - `task_id`, `state`, `summary`, `changed_files[]`, `exit_code`, `error_message`, `completed_at`
+- Create `docs/phase-6e-local-runner-plan.md` with full contract, adapter boundary, and migration steps (see plan)
+
+#### P6E.2 Implement minimal local runner
+
+- Create `runner/runner.js`:
+  - Scans `agent/jobs/*.request.json` for unclaimed jobs
+  - Atomically claims by writing `*.status.json` with `state: claimed`
+  - Dispatches to backend adapter based on `request.backend`
+  - Writes `*.status.json` updates as execution progresses
+  - Writes `*.result.json` with final state and changed files
+  - Handles SIGTERM: updates status to `cancelled` before exit
+- Create `runner/adapters/cursor-openclaw.js`:
+  - Accepts job context (request, host paths)
+  - Sends to OpenClaw Gateway via WebSocket RPC
+  - Polls `chat.history` for completion marker
+  - Returns `{ state, summary, changed_files, exit_code }`
+- Keep `runner/adapters/hermes.js` as a stub returning `{ state: 'failed', error_message: 'not implemented' }`
+
+#### P6E.3 Update n8n Implementation Agent
+
+- When task is not deterministic fast path:
+  - Write `agent/jobs/{task_id}.request.json`
+  - Return from Code node immediately (do not hold WebSocket connection)
+- Add a new Code node (or separate workflow): poll `agent/jobs/{task_id}.status.json` + `result.json`
+  - Poll interval: 10s, max 30 polls (5 min total)
+  - When `result.json` appears with `state: completed`:
+    - Write `agent/build/{task_id}.build.md`
+    - Update running task to `current_step: test_running`
+  - When `state: failed | timeout`:
+    - Write `agent/error/{task_id}.md` with result details
+    - Apply standard retry/error routing
+
+#### P6E.4 Smoke test with Local Runner + Cursor backend
+
+- Seed one fanout with `force_cursor: true` for the API child (reuse `seed_phase6d_cursor_smoke.sh`)
+- Start runner manually: `node runner/runner.js`
+- Verify end-to-end:
+  - `agent/jobs/` shows `request.json` → `status.json` transitions → `result.json`
+  - `agent/build/` artifact persisted
+  - API child reaches `done/`
+  - parent fanout aggregate reaches `done/`
+
+#### P6E.5 Exit Criteria
+
+- One Cursor-backed fanout child completes through Local Runner, reaching `done/`
+- `agent/jobs/` shows complete state progression for the child
+- `runner/runner.js` is idempotent on restart (does not re-claim in-flight jobs older than TTL)
+- Hermes adapter stub is present (safe no-op)
 
 ---
 
@@ -511,7 +606,7 @@ extension before Phase 5 bulk testing:
 | Stale locks dead-lock tasks                        | Med                     | Med                           | 10-min TTL recovery workflow (add in Phase 3)                                        |
 | LLM cost blowout                                   | Med                     | High                          | LiteLLM `max_budget: 2.0` + per-call max_tokens + Langfuse alerts                    |
 | Secrets in git                                     | Low                     | High                          | `.env` in `.gitignore`; `chmod 600 .env`; pre-commit hook to grep secrets (optional) |
-| OpenClaw security incidents (public CVEs reported) | Known                   | Med                           | Never expose ports; run local-only; check latest patches before Phase 3              |
+| OpenClaw Gateway security incidents (public CVEs reported) | Known                   | Med                           | Never expose ports; run local-only; use token + strict allowed origins; check latest patches before Phase 3 |
 | n8n filesystem binary + queue mode conflict        | High (official warning) | Low (we store md, not binary) | OK for POC; switch to MinIO/S3 if ever needed                                        |
 
 
@@ -519,8 +614,8 @@ extension before Phase 5 bulk testing:
 
 ## 6. Out of Scope (Explicit)
 
-- Multi-repo fanout (src/bff/api/batch) — Phase 6+
-- Codex / Claude Code integration — Phase 7+
+- Production-grade multi-repo fanout beyond the POC fixture repos — later; Phase 6C completed the POC multi-repo fanout runtime.
+- Direct Codex / Claude Code integration (bypassing OpenClaw router) — deferred
 - Hermes Agent integration — Phase 8+
 - Cloud deployment / webhook bridges — later
 - Agent-to-agent negotiation — later
@@ -536,7 +631,9 @@ extension before Phase 5 bulk testing:
 - **LiteLLM** is the **only** LLM ingress; no direct provider calls from workflows
 - **Langfuse** is the **only** observability backend (for POC)
 - **Local-only**; no tunneling
-- **OpenClaw** for execution in Phase 3; other agents deferred
+- **Local Implementation Runner** is the **execution control plane** (Phase 6E+); owns `agent/jobs/` as state source of truth
+- **OpenClaw Gateway + `cursor_agent`** is the **default backend adapter** for the Local Runner (not the state source)
+- Backend adapters are pluggable; OpenClaw and HermesAgent use the same runner contract
 
 ---
 
@@ -563,9 +660,9 @@ extension before Phase 5 bulk testing:
 
 ## 9. Post-POC Roadmap (not part of this plan)
 
-- **Phase 6**: Extend to 4-repo fanout; introduce task dependency graph
-- **Phase 7**: Route complex tasks to Codex / Claude Code selectively; A/B vs. DeepSeek
-- **Phase 8**: Integrate Hermes Agent for long-memory and skill accumulation
+- **Phase 6E**: Local Implementation Runner — completed/current baseline; self-controlled job state, pluggable backend adapters (cursor-openclaw, hermes, codex, claude)
+- **Phase 6F / 7**: Backend A/B preparation/execution — run Cursor adapter vs the first confirmed second backend (Hermes, Codex, Claude, or another non-interactive adapter); compare cost/latency/success rate
+- **Phase 8**: Hermes Agent integration — long-memory and skill accumulation behind the same runner adapter contract
 - **Phase 9**: Move orchestration to cloud n8n, keep execution local via webhook bridge
 - **Phase 10**: Build an eval set + automated regression against plan quality
 
