@@ -31,6 +31,9 @@ target-repos/*/dist/
 target-repos/*/.env
 
 agent/archive/
+agent/comms/
+agent/debug/
+agent/jobs/
 
 # execution error reports
 errors/*.md
@@ -38,6 +41,13 @@ errors/*.md
 
 # logs
 *.log
+
+# local usage and provider dumps
+codex-*-usage.json
+codex-cli-noninteractive.json
+codex-plus-user-reports.json
+hermesagent-wechat-positioning.json
+openclaw-openai-provider.json
 
 # OS / editor
 .DS_Store
