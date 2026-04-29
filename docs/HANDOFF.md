@@ -254,3 +254,18 @@ tracks while preserving the now-stable execution baseline.
 3. 标准回传模板：必须包含 `input prompt`、`raw output`、`exit/error`、`changed files`。
 4. 失败处理框架：先分类（环境/权限/工具路由/业务逻辑），再生成下一步最小动作 Prompt。
 5. 安全边界：严禁回传 secrets（`.env`、tokens、keys）；仅共享必要日志片段。
+
+## 7. Session Closure Note (2026-04-29)
+
+- This session used a two-agent coordination model (Cursor <-> Codex) through file-based communication under `agent/comms/`.
+- Phase 6B closure was completed under that model, including:
+  - accepted checkpoint range `...102` to `...108`,
+  - closure artifacts in:
+    - `docs/phase-6b-report.md`
+    - `docs/phase-6b-closure-memo.md`
+    - updated `docs/HANDOFF.md`
+- This current agent session is intentionally stopping after handoff preparation.
+- Next agent should continue discussion and execution planning for:
+  - HermesAgent track,
+  - Codex CLI optimization track.
+- Keep using scoped commits, avoid runtime artifact commits, and keep `target-repos/api` non-destructive unless explicitly approved.
