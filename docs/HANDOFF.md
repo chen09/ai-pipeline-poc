@@ -191,6 +191,15 @@
     - matching fanout error files for `...007` through `...011` were archived under `agent/archive/phase6d-history-cleanup-20260429T044149Z/error/files/`
     - traceability manifest: `agent/archive/phase6d-history-cleanup-20260429T044149Z/manifest.txt`
     - unrelated older forensic artifacts may still remain under `agent/error/`
+  - Continuation updates on 2026-04-30:
+    - Added Hermes minimal validation plan doc: `docs/phase-6e-hermes-validation-plan.md`
+    - Executed Hermes stub contract validation task `01PH6EHERMESVAL000000000001`; terminal artifacts match expected stub failure (`phase_6e_stub`) with empty `changed_files`
+    - Added Codex tuning notes: `docs/codex-runner-tuning.md`
+    - Codex adapter now supports optional tuning knobs with default-safe behavior:
+      - `CODEX_TIMEOUT_BUFFER_SECONDS`
+      - `CODEX_PLAN_MAX_CHARS`
+      - `CODEX_TEST_PLAN_MAX_CHARS`
+      - `CODEX_STDERR_TAIL_CHARS`
   - Detailed notes are in `docs/phase-6e-report.md`.
 
 ## 2. Pipeline v0.1 Architecture Summary
