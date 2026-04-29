@@ -29,6 +29,21 @@ are pipeline-version-specific and may evolve. Listed in execution order:
 | `test/`   | `{task_id}.test-run.md` (after build) | Execution & Analysis Agent |
 | `review/` | `{task_id}.review.md` (routing decision) | Review & Optimization Agent |
 
+## Phase 6E Implementation Job Artifacts
+
+Phase 6E adds Local Runner job artifacts under `jobs/`. These files are the
+source of truth for implementation execution state; n8n submits and polls them,
+while the Local Runner dispatches to backend adapters such as OpenClaw/Cursor.
+
+| Path | Meaning | Written by |
+| --- | --- | --- |
+| `jobs/{task_id}.request.json` | Implementation request for a backend adapter | Implementation Agent |
+| `jobs/{task_id}.status.json` | Claimed/running/terminal job status | Local Runner |
+| `jobs/{task_id}.result.json` | Terminal implementation result consumed before `build.md` | Local Runner |
+
+`agent/comms/` may exist for temporary agent-to-agent discussion notes. It is
+discussion-only and is not runtime input for n8n workflows or the Local Runner.
+
 ## TDD-like Multi-Agent Pipeline (v0.1)
 
 The pipeline follows a **test-first order**: the Test Generation Agent runs
@@ -92,7 +107,7 @@ inventing them after the fact.
 | --- | --- | --- | --- |
 | Planning Agent | `planning` | request | `plan.md` |
 | Test Generation Agent | `test_planning` | request + plan | `test-plan.md` |
-| Implementation Agent | `coding` | plan + **test-plan** (gate) | `build.md` |
+| Implementation Agent | `coding` | plan + **test-plan** (gate) | Local Runner job request/result via `agent/jobs/`, then `build.md` |
 | Execution & Analysis Agent | `test_running` | build + test-plan | `test-run.md` |
 | Review & Optimization Agent | `reviewing` | request + plan + test-plan + build + test-run | `review.md` |
 
@@ -173,7 +188,7 @@ run the test-plan against each, and select the one with the highest test-pass
 rate using an LLM judge or a lightweight verifier.
 
 ```text
-Implementation Agent × K      → K build artifacts
+Implementation Agent (`cursor_agent`) × K → K build artifacts
 Execution & Analysis Agent × K → K test-run artifacts
 Verifier (LLM judge)           → select best → Review & Optimization Agent
 ```
