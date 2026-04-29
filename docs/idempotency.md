@@ -177,6 +177,22 @@ then:
 
 Recovery must not touch tasks whose lock has not expired.
 
+### Orphan Lock Cleanup
+
+Terminal routing can leave a stale lock behind if the task file has already
+been moved to `done/` or `error/` but the worker exits before removing
+`agent/running/X.md.lock`.
+
+A cleanup workflow may remove a lock when:
+
+```text
+agent/running/X.md.lock exists
+agent/running/X.md does not exist
+```
+
+This cleanup is safe because the lock no longer protects a runnable task file.
+It must not delete locks that still have a sibling `agent/running/X.md`.
+
 ## Pipeline Versioning
 
 The claim semantics are stable across pipeline versions. Intermediate step

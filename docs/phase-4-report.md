@@ -32,10 +32,10 @@ Budget guardrail: HTTP 429 from LiteLLM → immediate route to `error/` with `bu
 - These callbacks are active; if `LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY` are empty,
   LiteLLM logs a warning but does not crash.
 
-## Langfuse Bootstrap (P4.1 — Manual Step)
+## Langfuse Bootstrap (P4.1 — Manual Step, historical note)
 
-Langfuse is running at `http://localhost:3000` and confirmed healthy.
-Keys are currently empty (`LANGFUSE_PUBLIC_KEY=`, `LANGFUSE_SECRET_KEY=`).
+This section reflects the first Phase 4 run checkpoint.
+Langfuse was running at `http://localhost:3000` and healthy, while keys were not yet filled at that moment.
 
 To activate full tracing:
 
@@ -84,11 +84,8 @@ The full v0.1 TDD-like feedback loop is functionally complete:
 
 ## Known Limitations
 
-- The seed tasks use deterministic implementation fallbacks. For a real pass, the
-  Implementation Agent needs to write tests in addition to application code.
-- Langfuse traces are not visible until keys are configured (see manual step above).
-- `done/` has no tasks in this run; all three seeds exhausted retries due to
-  known limitations of the deterministic fallbacks vs. strict review criteria.
+- The metrics in this report are baseline numbers captured before the OpenClaw Gateway + `cursor_agent` execution path was fully wired.
+- `done/` has no tasks in this run; all three seeds exhausted retries under the baseline implementation behavior.
 
 ## Next Step
 

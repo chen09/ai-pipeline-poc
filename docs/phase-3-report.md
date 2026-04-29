@@ -72,8 +72,9 @@ This matches the key Phase 3 exit behavior:
 
 ## Known Limitations
 
-- OpenClaw is not currently available in the n8n worker runtime.
-- Implementation workflow includes deterministic fallback behavior for current seed tasks and a generic failure path for unsupported tasks.
+- This report captures the initial Phase 3 baseline run before OpenClaw Gateway auth/origin wiring was finalized.
+- At that time, OpenClaw execution was not stably reachable from n8n worker runtime.
+- Later sessions replaced this baseline path with OpenClaw Gateway RPC + `cursor_agent` backend.
 - Phase 4 should add a stronger review-time enforcement strategy and optional artifact archiving by revision.
 
 ## Next Step
