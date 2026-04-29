@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-pipeline-poc.local/schemas/job-result.schema.json",
+  "title": "Implementation Job Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "task_id",
+    "state",
+    "backend",
+    "summary",
+    "changed_files",
+    "exit_code",
+    "completed_at"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "completed",
+        "failed",
+        "timeout",
+        "cancelled"
+      ]
+    },
+    "backend": {
+      "type": "string",
+      "enum": [
+        "cursor-openclaw",
+        "hermes",
+        "codex"
+      ]
+    },
+    "summary": {
+      "type": "string"
+    },
+    "changed_files": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "exit_code": {
+      "type": "integer"
+    },
+    "error_message": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "details": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

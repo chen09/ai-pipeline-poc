@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-pipeline-poc.local/schemas/job-request.schema.json",
+  "title": "Implementation Job Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "task_id",
+    "target_repo",
+    "backend",
+    "plan_ref",
+    "test_plan_ref",
+    "task_brief",
+    "created_at"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_repo": {
+      "type": "string",
+      "pattern": "^target-repos\\/.+"
+    },
+    "backend": {
+      "type": "string",
+      "enum": [
+        "cursor-openclaw",
+        "hermes",
+        "codex"
+      ]
+    },
+    "plan_ref": {
+      "type": "string",
+      "pattern": "^agent\\/plan\\/.+\\.plan\\.md$"
+    },
+    "test_plan_ref": {
+      "type": "string",
+      "pattern": "^agent\\/test\\/.+\\.test-plan\\.md$"
+    },
+    "task_brief": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "timeout_seconds": {
+      "type": "integer",
+      "minimum": 30,
+      "maximum": 7200,
+      "default": 300
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

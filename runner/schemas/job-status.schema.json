@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-pipeline-poc.local/schemas/job-status.schema.json",
+  "title": "Implementation Job Status",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "task_id",
+    "state",
+    "backend",
+    "started_at",
+    "updated_at",
+    "pid"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "claimed",
+        "running",
+        "completed",
+        "failed",
+        "timeout",
+        "cancelled"
+      ]
+    },
+    "backend": {
+      "type": "string",
+      "enum": [
+        "cursor-openclaw",
+        "hermes",
+        "codex"
+      ]
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "pid": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "message": {
+      "type": "string"
+    }
+  }
+}
