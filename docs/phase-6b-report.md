@@ -1,7 +1,7 @@
 # Phase 6B Report Template — Backend A/B Metrics
 
 **Date**: 2026-04-29  
-**Status**: Checkpoints `...107` and `...108` accepted; Phase 6B closure candidate ready  
+**Status**: Phase 6B execution closed (`CLOSE_NOW`) with checkpoints `...102`-`...108` accepted  
 **Scope**: Compare implementation backends behind the same artifact contract.
 
 ## Backend Variants
@@ -311,13 +311,33 @@ Checkpoint decisions:
 - `01PH6BABSMOKE000000000107`: **closed/accepted** after strict guard pass, bounded watch completion, and quality-gate pass.
 - `01PH6BABSMOKE000000000108`: **closed/accepted** after strict guard pass, bounded watch completion, and quality-gate pass.
 
-## Next Slice Readiness (Proposal Only)
+## Executive Closure
 
-- Candidate parent id placeholder: `01PH6BABSMOKE000000000109`
-- Preconditions before authorizing next slice:
-  - continuous runner consumer confirmed active at slice start,
-  - guard checks clean (`running/inbox/fanout-staged`, active status scan, codex availability),
-  - checkpoints `...102`-`...108` evidence accepted by codex review.
+- **Accepted checkpoint range**: `01PH6BABSMOKE000000000102` through `01PH6BABSMOKE000000000108`.
+- **Stabilized execution pattern**:
+  - strict pre-seed guards (`running/inbox/fanout-staged`, active status scan, `codex` availability),
+  - runtime seed via `scripts/seed_phase6b_backend_ab_smoke.sh --runtime --backend both`,
+  - bounded watch (10-minute baseline, 60-second cadence, optional +5-minute extension only for healthy cursor heartbeat),
+  - per-child acceptance gates (triad consistency, terminal health, endpoint+focused test evidence, repo quality gate).
+- **Final decision**: `CLOSE_NOW` for Phase 6B POC execution path.
+- **Closure rationale**:
+  - two consecutive long-run checkpoints (`...107`, `...108`) passed without reseed/recovery,
+  - both backends (`cursor`, `codex`) repeatedly reached terminal `completed`,
+  - quality gate (`npm test` in `target-repos/api`) remained green as coverage expanded.
+
+## Deferred / Out-of-Scope Items
+
+- `claude` backend execution remains deferred (access path and non-interactive route not yet confirmed).
+- Hermes backend remains a review/optimization track, not part of Phase 6B closure acceptance.
+- Cost benchmarking and policy ceilings are deferred to post-closure optimization work.
+- `docs/phase-6e-report.md` remains deferred and is not modified by this Phase 6B closure.
+
+## Immediate Next Workstreams
+
+- **Hermes review track**:
+  - implement focused Hermes adapter validation and review-quality comparison against current baseline.
+- **Codex usage optimization track**:
+  - tune Codex execution envelope (prompt shaping, timeout/sandbox knobs, and cost-latency profiling) while preserving current stability guarantees.
 
 ## Open Questions
 

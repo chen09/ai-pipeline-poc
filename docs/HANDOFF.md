@@ -59,13 +59,18 @@
   - Repeatable seed script added: `scripts/seed_phase6_vertical_slice.sh`.
   - Detailed notes are in `docs/phase-6a-report.md`.
 
-- **Phase 6B (Backend A/B Test Design)**: **DESIGN COMPLETED**.
-  - Backend A/B is prioritized before multi-repo fanout because implementation quality is still the largest variable.
-  - Cursor via OpenClaw `cursor_agent` is the current baseline.
-  - Codex/Claude variants are deferred until the user confirms access and a non-interactive tool path exists.
-  - Implementation Agent now has backend selector metadata (`cursor` default; unsupported future values fail explicitly).
-  - Metric template added: `docs/phase-6b-report.md`.
-  - Detailed design is in `docs/phase-6b-backend-ab-plan.md`.
+- **Phase 6B (Backend A/B Test Execution)**: **CLOSED (CLOSE_NOW)**.
+  - Accepted checkpoint range: `01PH6BABSMOKE000000000102` through `...108`.
+  - Execution pattern is stable and repeatable:
+    - strict guards before seed,
+    - runtime seed via `scripts/seed_phase6b_backend_ab_smoke.sh`,
+    - bounded watch with heartbeat-aware extension policy,
+    - acceptance gates on triad/terminal/endpoint-test evidence/quality gate.
+  - Cursor (OpenClaw path) and Codex both reached terminal `completed` across accepted checkpoints.
+  - Final closure docs:
+    - `docs/phase-6b-report.md`
+    - `docs/phase-6b-closure-memo.md`
+  - Design reference remains in `docs/phase-6b-backend-ab-plan.md`.
 
 - **Phase 6C (Multi-Repo Fanout Runtime)**: **AUTOMATED FANOUT + WORKER RESTART CHAOS PASSED**.
   - Live runtime inspection on 2026-04-26 confirmed services healthy and no active files in `agent/inbox/` or `agent/running/`.
@@ -202,15 +207,14 @@ Instead of a monolithic agent or linear script, tasks flow through an artifact-d
 
 ## 3. Next Steps for the New Agent (交接任务)
 
-The next agent should finish documentation synchronization first, then write a short
-6E acceptance snapshot memo, then prepare Backend A/B entry gates. Core runtime
-validation with one real Cursor child has passed.
+The next agent should treat Phase 6B as closed and move into focused post-closure
+tracks while preserving the now-stable execution baseline.
 
 **Immediate To-Dos for the new session:**
 
-1. Finish doc synchronization for the Phase 6E Local Runner baseline.
-2. Write a 6E acceptance snapshot memo after docs are synchronized.
-3. Prepare Backend A/B gates, while keeping Codex/Claude execution deferred until the user confirms access and a non-interactive path.
+1. Start Hermes review track from the stable Phase 6B baseline.
+2. Start Codex usage optimization track (cost/latency/reliability tuning).
+3. Keep Claude backend execution deferred until access and non-interactive route are confirmed.
 4. Do not reset or clean `target-repos/api` without explicit user confirmation.
 5. Apply the historical archive policy below whenever cleanup is needed.
 
