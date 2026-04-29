@@ -2,17 +2,22 @@
 
 const fs = require("fs");
 const path = require("path");
-const { spawnSync } = require("child_process");
+const { execSync, spawn } = require("child_process");
 
 function gitChangedFiles(targetRepoAbs, targetRepoRel) {
-  const probe = spawnSync("git", ["status", "--short"], {
-    cwd: targetRepoAbs,
-    encoding: "utf8",
-    timeout: 5000,
-    maxBuffer: 1024 * 1024,
-  });
-  if (probe.error || probe.status !== 0) return [];
-  const output = String(probe.stdout || "").trim();
+  let output = "";
+  try {
+    output = String(
+      execSync("git status --short", {
+        cwd: targetRepoAbs,
+        stdio: ["ignore", "pipe", "pipe"],
+        timeout: 5000,
+        maxBuffer: 1024 * 1024,
+      }) || "",
+    ).trim();
+  } catch {
+    return [];
+  }
   if (!output) return [];
   return output
     .split("\n")
@@ -50,9 +55,17 @@ function parseCompletion(raw, fallbackChangedFiles) {
 }
 
 function buildPrompt(requestPayload, completionPath) {
+  const marker = `IMPLEMENTATION_RESULT:${requestPayload.task_id}`;
   return `You are the implementation backend for a local multi-agent POC.
 
-Return exactly one JSON object to ${completionPath} with this schema:
+You are executing in repo:
+- target repo metadata path: ${requestPayload.target_repo}
+- absolute target repo path: ${requestPayload.target_repo_abs}
+- correlation marker: ${marker}
+
+Return exactly one raw JSON object as your final message and write exactly that JSON object to ${completionPath}.
+
+Completion JSON schema:
 {
   "task_id": "${requestPayload.task_id}",
   "success": boolean,
@@ -65,14 +78,76 @@ Return exactly one JSON object to ${completionPath} with this schema:
 }
 
 Rules:
-- Modify only files under ${requestPayload.target_repo}.
+- Modify only files under ${requestPayload.target_repo_abs}.
 - Run npm test if practical.
 - Do not print or read secrets.
 - If blocked, set success=false and explain blocker/error.
+- Final summary must include marker: ${marker}
 
 Task brief:
 ${requestPayload.task_brief}
+
+Plan:
+${requestPayload.plan_content}
+
+Test plan:
+${requestPayload.test_plan_content}
 `;
+}
+
+function runCodexExec(executable, args, prompt, timeoutMs) {
+  return new Promise((resolve) => {
+    const proc = spawn(executable, args, {
+      stdio: ["pipe", "pipe", "pipe"],
+      env: process.env,
+    });
+
+    let stdout = "";
+    let stderr = "";
+    let timedOut = false;
+
+    const timer = setTimeout(() => {
+      timedOut = true;
+      try {
+        proc.kill("SIGKILL");
+      } catch {
+        // noop
+      }
+    }, timeoutMs);
+
+    proc.stdout.on("data", (chunk) => {
+      stdout += String(chunk);
+    });
+    proc.stderr.on("data", (chunk) => {
+      stderr += String(chunk);
+    });
+
+    proc.on("error", (error) => {
+      clearTimeout(timer);
+      resolve({
+        status: null,
+        signal: null,
+        stdout,
+        stderr,
+        error,
+        timedOut: false,
+      });
+    });
+
+    proc.on("close", (code, signal) => {
+      clearTimeout(timer);
+      resolve({
+        status: code,
+        signal,
+        stdout,
+        stderr,
+        error: null,
+        timedOut,
+      });
+    });
+
+    proc.stdin.end(prompt);
+  });
 }
 
 async function run(requestPayload, paths, logger) {
@@ -82,7 +157,12 @@ async function run(requestPayload, paths, logger) {
   const timeoutMs = (Number.isFinite(timeoutSeconds) ? timeoutSeconds : 300) * 1000;
   const jobsDir = path.join(paths.projectRoot, "agent", "jobs");
   const completionPath = path.join(jobsDir, `${requestPayload.task_id}.completion.json`);
-  const prompt = buildPrompt(requestPayload, completionPath);
+  const prompt = buildPrompt({
+    ...requestPayload,
+    target_repo_abs: paths.targetRepoAbs,
+    plan_content: fs.readFileSync(paths.planAbs, "utf8"),
+    test_plan_content: fs.readFileSync(paths.testPlanAbs, "utf8"),
+  }, completionPath);
 
   try {
     if (fs.existsSync(completionPath)) fs.rmSync(completionPath);
@@ -106,12 +186,7 @@ async function run(requestPayload, paths, logger) {
   ];
   logger.info("codex_exec_start", { executable, args, completionPath, timeoutMs });
 
-  const proc = spawnSync(executable, args, {
-    input: prompt,
-    encoding: "utf8",
-    timeout: timeoutMs,
-    maxBuffer: 16 * 1024 * 1024,
-  });
+  const proc = await runCodexExec(executable, args, prompt, timeoutMs);
 
   if (proc.error) {
     const code = proc.error.code || "";
@@ -126,11 +201,13 @@ async function run(requestPayload, paths, logger) {
       changed_files: [],
       exit_code: 3,
       error_message: message,
-      details: {},
+      details: {
+        stderr: String(proc.stderr || "").slice(-4000),
+      },
     };
   }
 
-  if (proc.signal === "SIGTERM" || proc.signal === "SIGKILL") {
+  if (proc.timedOut || proc.signal === "SIGTERM" || proc.signal === "SIGKILL") {
     logger.error("codex_exec_timeout", { signal: proc.signal });
     return {
       state: "timeout",
@@ -138,7 +215,9 @@ async function run(requestPayload, paths, logger) {
       changed_files: [],
       exit_code: 124,
       error_message: "codex_exec_timeout",
-      details: {},
+      details: {
+        stderr: String(proc.stderr || "").slice(-4000),
+      },
     };
   }
 

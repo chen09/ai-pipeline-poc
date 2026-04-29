@@ -40,17 +40,23 @@ Status:
 - Proven by PH6A task `01PH6AVERTICAL000000000602`.
 - Current baseline for all future comparisons.
 
-### Variant B — Codex Backend (Future)
+### Variant B — Codex Backend (Runner-Wired, Validation Pending)
 
 ```text
 Implementation Agent -> OpenClaw Gateway -> codex_agent or codex_cli wrapper
 ```
 
-Entry criteria:
+Current state:
+
+- Runner contract wiring exists through Local Runner via `runner/adapters/codex.js`.
+- Fake-adapter coverage exists for invocation + prompt/completion parsing.
+- First live benchmark slice is still pending.
+
+Entry criteria for live A/B:
 
 - User confirms Codex subscription/API access.
-- OpenClaw exposes a Codex-capable tool, or a wrapper can call Codex CLI locally.
-- Tool can run in non-interactive mode and return structured output.
+- Non-interactive Codex path is stable in this environment.
+- Live run can complete with scoped artifact outputs and deterministic benchmark inputs.
 
 ### Variant C — Claude Code Backend (Future)
 
@@ -173,7 +179,7 @@ Current prep status:
 
 - Backend selector added to `n8n-workflows/implementation-agent.n8n.js`.
 - Default backend is `cursor`.
-- Unsupported `codex`/`claude` values return `backend_unsupported` until explicit tool paths exist.
+- `codex` is now runner-wired through Codex CLI (non-interactive path), while `claude` remains deferred until access and a non-interactive tool path exist.
 - Build artifacts now include backend metadata fields.
 - Metric template added at `docs/phase-6b-report.md`.
 
