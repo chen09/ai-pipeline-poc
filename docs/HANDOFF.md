@@ -1203,3 +1203,50 @@ FINAL MAIN DIAGRAM CONFIRMED BY USER
 ### Canonical Files
 - SVG source: `docs/images/poc-final-architecture-2026-05-05-full.svg`
 - PNG export: `docs/images/poc-final-architecture-2026-05-05-full.png`
+
+## 27. GitHub Publish Handoff (2026-05-05)
+
+### Status
+PUBLISHED TO GITHUB
+
+### Remote
+- Repository: `git@github.com:chen09/ai-pipeline-poc.git`
+- Branch: `main`
+- Published commit: `0230fd9 chore: publish phase 6e poc artifacts`
+- Local branch state after publish: `main` tracks `origin/main`.
+
+### Published Scope
+- Phase 6E POC source, docs, runner, n8n workflow exports, scripts, final diagrams, journey summary, and presentation deck are published.
+- Target fixture repos are published as normal source directories under:
+  - `target-repos/api`
+  - `target-repos/bff`
+  - `target-repos/web`
+  - `target-repos/batch`
+
+### Local-Only / Ignored State
+- Runtime and forensic state remains intentionally excluded from Git:
+  - `data/`
+  - `agent/jobs/`
+  - `agent/archive/`
+  - `agent/comms/`
+  - `agent/debug/`
+  - `target-repos/*/node_modules/`
+  - `target-repos/*/agent/`
+- `target-repos/api` was previously a nested Git repository. Its inner `.git` directory was not deleted; it was renamed locally to:
+  - `target-repos/api/.git.local-backup-20260505-upload`
+- That backup is ignored by the parent repo. Do not delete it unless the user explicitly approves cleanup.
+
+### Publish Verification
+- `git diff --cached --check`: passed before publish.
+- Secret scan found only documented environment variable names, not concrete secret values, in published files.
+- Test verification before publish:
+  - `runner`: 2/2 passed
+  - `target-repos/api`: 32 files / 47 tests passed
+  - `target-repos/bff`: 2/2 passed
+  - `target-repos/web`: 2/2 passed
+  - `target-repos/batch`: 1/1 passed
+
+### Notes For Next Agent
+- The GitHub upload is complete; do not reinitialize or recreate the remote.
+- If future edits touch target fixtures, remember `target-repos/api` is now source managed by the parent repo, not by its former nested Git metadata.
+- Keep future continuity notes appended to this file; do not create a root-level handoff file.
