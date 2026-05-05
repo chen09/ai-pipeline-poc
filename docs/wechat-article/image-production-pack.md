@@ -34,6 +34,12 @@ Save generated images under `docs/wechat-article/images/` using:
 
 Recommended source export: PNG, 16:9, at least 1792px wide. Prefer 3840x2160 if available.
 
+Generated source tracking:
+
+| Figure | ChatGPT source link | Status |
+| --- | --- | --- |
+| Figure 1 | `https://chatgpt.com/s/m_69fa0bb456ec8191bc0518e4613cf519` | Download and save as `docs/wechat-article/images/fig-01-single-agent-to-multi-agent.png` |
+
 ## Figure 1: Single Agent To Engineered Multi-Agent
 
 ### Use In Article
