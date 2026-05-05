@@ -1,0 +1,63 @@
+{
+  "id": "fanout-child-releaser",
+  "name": "Fanout Child Releaser",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "da3d7495-c421-4b14-8ce6-71f3aa6f8108",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const fs = require('fs');\nreturn await eval(`(async () => {${fs.readFileSync('/files/workflows/fanout-child-releaser.n8n.js', 'utf8')}\\n})()`);"
+      },
+      "id": "0e147b41-b96a-48fd-a434-1bbdf935f7f7",
+      "name": "Run Fanout Child Releaser",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Run Fanout Child Releaser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "versionId": "7422fb44-3f8f-418f-bce5-7f44b2fdfffd",
+  "triggerCount": 0,
+  "tags": []
+}

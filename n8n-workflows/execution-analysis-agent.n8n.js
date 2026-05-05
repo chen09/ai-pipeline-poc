@@ -9,7 +9,7 @@ const TEST_DIR = path.join(AGENT_ROOT, "test");
 const BUILD_DIR = path.join(AGENT_ROOT, "build");
 const ERROR_DIR = path.join(AGENT_ROOT, "error");
 const LOCK_TTL_SECONDS = 600;
-const TARGET_REPO = "/files/target-repos/api";
+const CONTAINER_PROJECT_ROOT = "/files";
 
 function nowIso() {
   return new Date().toISOString();
@@ -60,6 +60,15 @@ function requireField(fields, key) {
   return fields[key];
 }
 
+function getTargetRepoContainerPath(task) {
+  const targetRepo = requireField(task.fields, "target_repo");
+  const normalized = path.posix.normalize(String(targetRepo).replace(/\\/g, "/"));
+  if (normalized.startsWith("../") || normalized.startsWith("/") || !normalized.startsWith("target-repos/")) {
+    throw new Error(`Invalid target_repo path: ${targetRepo}`);
+  }
+  return path.posix.join(CONTAINER_PROJECT_ROOT, normalized);
+}
+
 function lockTask(fileName) {
   const runningPath = path.join(RUNNING_DIR, fileName);
   const lockPath = `${runningPath}.lock`;
@@ -108,10 +117,10 @@ function selectTask() {
   return null;
 }
 
-function runTests() {
+function runTests(task) {
   try {
     const output = execSync("npm test", {
-      cwd: TARGET_REPO,
+      cwd: getTargetRepoContainerPath(task),
       stdio: ["ignore", "pipe", "pipe"],
     });
     return { ok: true, output: output.toString("utf8"), exitCode: 0 };
@@ -176,7 +185,7 @@ const task = selectTask();
 if (!task) return [{ json: { status: "NO_TASK" } }];
 
 try {
-  const result = runTests();
+  const result = runTests(task);
 
   if (result.ok) {
     writeTestRunArtifact(task, result, "pass", "reviewing");

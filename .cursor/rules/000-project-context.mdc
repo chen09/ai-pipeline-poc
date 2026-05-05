@@ -1,18 +1,47 @@
 ---
-description: Auto-read project context and handoff on every new task or chat
+description: Always read ai-pipeline-poc operating context before project work
 globs: *
 ---
-# Always Read the Handoff First
 
-When starting a new task, chat, or agent session in this project, you MUST proactively read the following files to understand the current architecture, progress, and rules:
+# ai-pipeline-poc Project Context
 
-1. `docs/HANDOFF.md` (Current state and next steps)
-2. `PLAN.md` (The high-level roadmap and exit criteria)
+When starting a new task, chat, or agent session in this project, first read these files in order:
 
-For specific architectural constraints when editing workflows or agent code, also consult:
-- `agent/README.md` (Artifact-driven Multi-Agent feedback loop)
-- `docs/task-schema.md` (State machine fields and step enums)
-- `docs/idempotency.md` (Lock recovery, archiving, and idempotency rules)
-- `docs/RESEARCH_REFERENCES.md` (Academic background for the POC)
+1. `AGENTS.md` - operating guide, safety rules, runtime notes
+2. `docs/HANDOFF.md` - current state, active baseline, continuity notes
+3. `PLAN.md` - roadmap and exit criteria
+4. `README.md` - project overview, if broader context is needed
 
-Do NOT guess the project context. Always rely on these documentation files as the source of truth.
+`docs/HANDOFF.md` is the single source of truth for current state, active execution baseline, backend assumptions, and continuity notes. Do not create a second handoff file.
+
+## Safety Defaults
+
+- The working tree may be intentionally dirty. Do not reset, checkout, clean, or discard files unless the user explicitly asks.
+- Do not reset or clean `target-repos/api` without explicit user confirmation.
+- Archive runtime or forensic artifacts before cleanup.
+- Never directly delete runtime or forensic state unless the user explicitly approves deletion.
+- Do not read, print, summarize, or expose secrets from `.env`, token files, OpenClaw credential files, or provider config files.
+- Ask before broad filesystem changes, core config changes, credential/provider changes, or batch operations.
+
+## Architecture References
+
+For workflow or agent-code edits, also consult:
+
+- `agent/README.md` - artifact-driven multi-agent feedback loop
+- `docs/task-schema.md` - state machine fields and step enums
+- `docs/idempotency.md` - lock recovery, archiving, and idempotency rules
+- `docs/RESEARCH_REFERENCES.md` - academic background for the POC
+
+## Runtime Baseline
+
+- Implementation state is owned through `agent/jobs/` artifacts unless `docs/HANDOFF.md` says otherwise.
+- Backend tracks, provider assumptions, and active execution baseline must be read from `docs/HANDOFF.md`.
+- Do not guess project context. Use the project docs as the source of truth.
+
+## Skills
+
+If local shared skills are available, consult:
+
+`~/.agents/SKILLS_INDEX.md`
+
+Use it to choose one primary skill and, if needed, one supporting skill. For bugs/regressions prefer `diagnose`; for coding discipline prefer `karpathy-guidelines`.

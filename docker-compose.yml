@@ -199,6 +199,8 @@ services:
       N8N_PROTOCOL: http
       GENERIC_TIMEZONE: UTC
       N8N_RUNNERS_ENABLED: "true"
+      N8N_RUNNERS_HEARTBEAT_INTERVAL: "300"
+      N8N_RUNNERS_TASK_REQUEST_TIMEOUT: "300"
       N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
       NODE_FUNCTION_ALLOW_BUILTIN: fs,path,os,http,url,child_process
     volumes:

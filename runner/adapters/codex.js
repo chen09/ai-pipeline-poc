@@ -1,6 +1,7 @@
 "use strict";
 
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
 const { execSync, spawn } = require("child_process");
 
@@ -30,6 +31,7 @@ function resolveCodexExecutable() {
   if (configured && configured.trim()) return configured.trim();
   if (process.platform === "darwin") {
     const candidates = [
+      path.join(os.homedir(), ".local", "bin", "codex"),
       "/Volumes/WDC2T/Applications/Codex.app/Contents/Resources/codex",
       "/Applications/Codex.app/Contents/Resources/codex",
       "/Volumes/WDC2T/Applications/Codex.app/Contents/MacOS/Codex",

@@ -1,0 +1,329 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3840" height="2160" viewBox="0 0 3840 2160">
+  <defs>
+    <marker id="arrowGray" markerWidth="18" markerHeight="18" refX="17" refY="9" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2,2 L17,9 L2,16 Z" fill="#475569"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="18" markerHeight="18" refX="17" refY="9" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2,2 L17,9 L2,16 Z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="18" markerHeight="18" refX="17" refY="9" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M2,2 L17,9 L2,16 Z" fill="#dc2626"/>
+    </marker>
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+    <style>
+      .font { font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Microsoft YaHei", Arial, sans-serif; }
+      .title { font-size: 72px; font-weight: 760; fill: #111827; }
+      .subtitle { font-size: 38px; font-weight: 420; fill: #475569; }
+      .badge { font-size: 26px; font-weight: 650; fill: #166534; }
+      .band-title { font-size: 38px; font-weight: 760; }
+      .band-subtitle { font-size: 29px; font-weight: 420; fill: #475569; }
+      .section-label { font-size: 28px; font-weight: 760; fill: #0f172a; }
+      .node-title { font-size: 30px; font-weight: 720; fill: #111827; }
+      .node-body { font-size: 26px; font-weight: 430; fill: #334155; }
+      .small { font-size: 24px; font-weight: 430; fill: #475569; }
+      .tiny { font-size: 22px; font-weight: 430; fill: #64748b; }
+      .mono { font-family: "SFMono-Regular", "Menlo", "Consolas", monospace; }
+      .white { fill: #ffffff; }
+      .muted { fill: #64748b; }
+      .ok { fill: #15803d; }
+      .warn { fill: #b45309; }
+      .red { fill: #dc2626; }
+      .blue { fill: #2563eb; }
+      .orange { fill: #d97706; }
+      .purple { fill: #7c3aed; }
+      .green { fill: #047857; }
+    </style>
+  </defs>
+
+  <rect width="3840" height="2160" fill="#fbfaf7"/>
+  <rect x="0" y="0" width="3840" height="168" fill="#ffffff" opacity="0.92"/>
+
+  <text class="font title" x="70" y="88">本地优先 Multi-Agent AI 开发流水线 POC 架构图</text>
+  <text class="font subtitle" x="72" y="143">n8n 编排 × Local Runner 状态根 × OpenClaw/Hermes 后端桥接 × Cursor/Codex CLI × LiteLLM/Langfuse 可观测</text>
+  <rect x="2500" y="38" width="1270" height="72" rx="20" fill="#ecfdf5" stroke="#16a34a" stroke-width="3"/>
+  <circle cx="2544" cy="74" r="22" fill="#16a34a"/>
+  <path d="M2532 72 L2541 82 L2558 62" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text class="font badge" x="2580" y="82">POC Closed · Phase 6E + 2026-05-05 Re-baseline · CLI Matrix 8/8</text>
+
+  <!-- Right side storage panel -->
+  <g filter="url(#softShadow)">
+    <rect x="3060" y="385" width="710" height="1210" rx="28" fill="#f8fafc" stroke="#64748b" stroke-width="4"/>
+  </g>
+  <text class="font band-title" x="3110" y="450" fill="#334155">文件状态机</text>
+  <text class="font band-subtitle" x="3112" y="496">共享目录 / 可恢复证据</text>
+
+  <g class="font node-body mono">
+    <text x="3115" y="555">agent/</text>
+    <text x="3145" y="602">├─ inbox/</text>
+    <text class="font small" x="3370" y="602">输入任务</text>
+    <text x="3145" y="650">├─ running/</text>
+    <text class="font small" x="3370" y="650">锁与当前步骤</text>
+    <text x="3145" y="698">├─ fanout/</text>
+    <text class="font small" x="3370" y="698">父子任务图</text>
+    <text x="3145" y="746">│  └─ staged/</text>
+    <text class="font small" x="3370" y="746">依赖门控释放</text>
+    <text x="3145" y="794">├─ plan/</text>
+    <text class="font small" x="3370" y="794">plan.md</text>
+    <text x="3145" y="842">├─ test/</text>
+    <text class="font small" x="3370" y="842">test-plan / test-run</text>
+    <text x="3145" y="890">├─ build/</text>
+    <text class="font small" x="3370" y="890">build.md</text>
+    <text x="3145" y="938">├─ review/</text>
+    <text class="font small" x="3370" y="938">review.md</text>
+    <text x="3145" y="986">├─ jobs/</text>
+    <text class="font small" x="3370" y="986">Runner 状态根</text>
+    <text x="3175" y="1034">request.json</text>
+    <text x="3175" y="1082">status.json</text>
+    <text x="3175" y="1130">result.json</text>
+    <text x="3175" y="1178">completion.json</text>
+    <text x="3145" y="1226">├─ done/</text>
+    <text class="font small" x="3370" y="1226">终态成功包</text>
+    <text x="3145" y="1274">├─ error/</text>
+    <text class="font small" x="3370" y="1274">终态失败包</text>
+    <text x="3145" y="1322">├─ archive/</text>
+    <text class="font small" x="3370" y="1322">取证归档</text>
+    <text x="3145" y="1370">└─ comms/</text>
+    <text class="font small" x="3370" y="1370">A2A 讨论</text>
+  </g>
+
+  <rect x="3110" y="1430" width="610" height="116" rx="18" fill="#fff7ed" stroke="#f59e0b" stroke-width="2"/>
+  <text class="font section-label" x="3140" y="1472">状态原则</text>
+  <text class="font small" x="3140" y="1510">运行态不进提交；清理先归档；</text>
+  <text class="font small" x="3140" y="1542">task_id 是持久身份，文件名只是标签。</text>
+
+  <!-- Band 1 -->
+  <g filter="url(#softShadow)">
+    <rect x="70" y="188" width="2920" height="170" rx="28" fill="#eef6ff" stroke="#2563eb" stroke-width="4"/>
+  </g>
+  <text class="font band-title blue" x="110" y="238">1 输入 / 触发</text>
+  <text class="font band-subtitle" x="110" y="278">触发源 → 本地文件状态机 → n8n 编排入口</text>
+
+  <g>
+    <rect x="690" y="218" width="500" height="100" rx="18" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+    <text class="font node-title" x="730" y="263">Webhook / API</text>
+    <text class="font small" x="730" y="300">HTTP 入口 / 外部系统</text>
+
+    <rect x="1240" y="218" width="500" height="100" rx="18" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+    <text class="font node-title" x="1280" y="263">文件任务</text>
+    <text class="font small" x="1280" y="300">fixtures/seed_tasks → inbox</text>
+
+    <rect x="1790" y="218" width="500" height="100" rx="18" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+    <text class="font node-title" x="1830" y="263">手动任务</text>
+    <text class="font small" x="1830" y="300">load_seed / 演示 / 调试</text>
+
+    <rect x="2340" y="218" width="500" height="100" rx="18" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+    <text class="font node-title" x="2380" y="263">Cron 定时任务</text>
+    <text class="font small" x="2380" y="300">n8n scheduler / OpenClaw cron</text>
+  </g>
+  <line x1="1530" y1="358" x2="1530" y2="385" stroke="#475569" stroke-width="6" marker-end="url(#arrowGray)"/>
+
+  <!-- Band 2 -->
+  <g filter="url(#softShadow)">
+    <rect x="70" y="385" width="2920" height="245" rx="28" fill="#fff7ed" stroke="#f97316" stroke-width="4"/>
+  </g>
+  <text class="font band-title orange" x="110" y="442">2 n8n = 编排器</text>
+  <text class="font band-subtitle" x="110" y="486">编排器，不是 Agent 大脑</text>
+
+  <g>
+    <rect x="650" y="444" width="350" height="116" rx="18" fill="#ffffff" stroke="#fdba74" stroke-width="2"/>
+    <text class="font node-title" x="685" y="488">事件监听</text>
+    <text class="font small" x="685" y="524">Webhook / Cron / 文件轮询</text>
+
+    <rect x="1035" y="444" width="350" height="116" rx="18" fill="#ffffff" stroke="#fdba74" stroke-width="2"/>
+    <text class="font node-title" x="1070" y="488">任务路由</text>
+    <text class="font small" x="1070" y="524">解析任务 / task_id / 状态</text>
+
+    <rect x="1420" y="444" width="350" height="116" rx="18" fill="#ffffff" stroke="#fdba74" stroke-width="2"/>
+    <text class="font node-title" x="1455" y="488">Fanout 路由</text>
+    <text class="font small" x="1455" y="524">父任务拆分 / 依赖释放</text>
+
+    <rect x="1805" y="444" width="350" height="116" rx="18" fill="#ffffff" stroke="#fdba74" stroke-width="2"/>
+    <text class="font node-title" x="1840" y="488">工作流编排</text>
+    <text class="font small" x="1840" y="524">规划 → 测试 → 实现 → 评审</text>
+
+    <rect x="2190" y="444" width="350" height="116" rx="18" fill="#ffffff" stroke="#fdba74" stroke-width="2"/>
+    <text class="font node-title" x="2225" y="488">状态推进</text>
+    <text class="font small" x="2225" y="524">原子移动 / 锁 / 重试</text>
+
+    <rect x="2575" y="444" width="350" height="116" rx="18" fill="#ffffff" stroke="#fdba74" stroke-width="2"/>
+    <text class="font node-title" x="2610" y="488">通知集成</text>
+    <text class="font small" x="2610" y="524">WeCom / Slack / Email / Webhook</text>
+  </g>
+  <line x1="1000" y1="502" x2="1035" y2="502" stroke="#475569" stroke-width="5" marker-end="url(#arrowGray)"/>
+  <line x1="1385" y1="502" x2="1420" y2="502" stroke="#475569" stroke-width="5" marker-end="url(#arrowGray)"/>
+  <line x1="1770" y1="502" x2="1805" y2="502" stroke="#475569" stroke-width="5" marker-end="url(#arrowGray)"/>
+  <line x1="2155" y1="502" x2="2190" y2="502" stroke="#475569" stroke-width="5" marker-end="url(#arrowGray)"/>
+  <line x1="2540" y1="502" x2="2575" y2="502" stroke="#475569" stroke-width="5" marker-end="url(#arrowGray)"/>
+  <line x1="1530" y1="630" x2="1530" y2="655" stroke="#475569" stroke-width="6" marker-end="url(#arrowGray)"/>
+  <line x1="2990" y1="505" x2="3060" y2="505" stroke="#475569" stroke-width="6" marker-end="url(#arrowGray)"/>
+
+  <!-- Band 3 -->
+  <g filter="url(#softShadow)">
+    <rect x="70" y="655" width="2920" height="310" rx="28" fill="#eff6ff" stroke="#2563eb" stroke-width="4"/>
+  </g>
+  <text class="font band-title blue" x="110" y="712">3 多角色 Agent 流水线（5 阶段 / TDD-like）</text>
+  <text class="font band-subtitle" x="110" y="754">每个角色只产出一个清晰 artifact；失败分类后短路重试或回到前序步骤</text>
+
+  <g>
+    <rect x="120" y="782" width="510" height="116" rx="18" fill="#ffffff" stroke="#60a5fa" stroke-width="3"/>
+    <circle cx="160" cy="826" r="28" fill="#2563eb"/>
+    <text class="font node-title white" x="151" y="836">1</text>
+    <text class="font node-title" x="205" y="818">Planning Agent</text>
+    <text class="font small" x="205" y="854">输出：plan.md</text>
+    <text class="font small muted" x="205" y="887">任务理解 / 模型选择</text>
+
+    <rect x="690" y="782" width="510" height="116" rx="18" fill="#ffffff" stroke="#60a5fa" stroke-width="3"/>
+    <circle cx="730" cy="826" r="28" fill="#2563eb"/>
+    <text class="font node-title white" x="721" y="836">2</text>
+    <text class="font node-title" x="775" y="818">Test Generation Agent</text>
+    <text class="font small" x="775" y="854">输出：test-plan.md</text>
+    <text class="font small muted" x="775" y="887">TDD Gate：先测试目标</text>
+
+    <rect x="1260" y="782" width="510" height="116" rx="18" fill="#fffdf0" stroke="#60a5fa" stroke-width="3"/>
+    <circle cx="1300" cy="826" r="28" fill="#2563eb"/>
+    <text class="font node-title white" x="1291" y="836">3</text>
+    <text class="font node-title" x="1345" y="818">Implementation Agent</text>
+    <text class="font small" x="1345" y="854">写入 job request</text>
+    <text class="font small muted" x="1345" y="887">等待 Local Runner 回执</text>
+
+    <rect x="1830" y="782" width="510" height="116" rx="18" fill="#ffffff" stroke="#60a5fa" stroke-width="3"/>
+    <circle cx="1870" cy="826" r="28" fill="#2563eb"/>
+    <text class="font node-title white" x="1861" y="836">4</text>
+    <text class="font node-title" x="1915" y="818">Execution &amp; Analysis</text>
+    <text class="font small" x="1915" y="854">输出：test-run.md</text>
+    <text class="font small muted" x="1915" y="887">npm test / 失败分类</text>
+
+    <rect x="2400" y="782" width="510" height="116" rx="18" fill="#ffffff" stroke="#60a5fa" stroke-width="3"/>
+    <circle cx="2440" cy="826" r="28" fill="#2563eb"/>
+    <text class="font node-title white" x="2431" y="836">5</text>
+    <text class="font node-title" x="2485" y="818">Review &amp; Optimization</text>
+    <text class="font small" x="2485" y="854">输出：review.md</text>
+    <text class="font small muted" x="2485" y="887">pass / retry / error</text>
+  </g>
+  <line x1="630" y1="840" x2="668" y2="840" stroke="#2563eb" stroke-width="7" marker-end="url(#arrowBlue)"/>
+  <line x1="1200" y1="840" x2="1238" y2="840" stroke="#2563eb" stroke-width="7" marker-end="url(#arrowBlue)"/>
+  <line x1="1770" y1="840" x2="1808" y2="840" stroke="#2563eb" stroke-width="7" marker-end="url(#arrowBlue)"/>
+  <line x1="2340" y1="840" x2="2378" y2="840" stroke="#2563eb" stroke-width="7" marker-end="url(#arrowBlue)"/>
+
+  <path d="M2660 914 C2320 956, 1640 956, 1010 914" fill="none" stroke="#dc2626" stroke-width="5" stroke-dasharray="16 12" marker-end="url(#arrowRed)"/>
+  <rect x="1110" y="914" width="1510" height="34" rx="10" fill="#eff6ff"/>
+  <text class="font small red" x="1140" y="940">失败分类 → 重试 / 回滚 / 重新规划：plan_issue、code_issue、test_issue、critical</text>
+  <line x1="1530" y1="965" x2="1530" y2="990" stroke="#475569" stroke-width="6" marker-end="url(#arrowGray)"/>
+  <line x1="2990" y1="820" x2="3060" y2="820" stroke="#475569" stroke-width="6" marker-end="url(#arrowGray)"/>
+
+  <!-- Band 4 -->
+  <g filter="url(#softShadow)">
+    <rect x="70" y="990" width="2920" height="260" rx="28" fill="#064e3b" stroke="#047857" stroke-width="4"/>
+  </g>
+  <text class="font band-title white" x="110" y="1052">4 Local Implementation Runner = 执行控制面</text>
+  <text class="font band-subtitle white" x="110" y="1095" opacity="0.88">拥有 agent/jobs 状态根；把 n8n 从长连接、轮询和后端不确定性中解耦</text>
+
+  <g>
+    <rect x="130" y="1130" width="510" height="72" rx="18" fill="#ecfdf5" stroke="#86efac" stroke-width="2"/>
+    <text class="font node-title green" x="180" y="1176">request.json</text>
+    <rect x="710" y="1130" width="510" height="72" rx="18" fill="#ecfdf5" stroke="#86efac" stroke-width="2"/>
+    <text class="font node-title green" x="760" y="1176">status.json</text>
+    <rect x="1290" y="1130" width="510" height="72" rx="18" fill="#ecfdf5" stroke="#86efac" stroke-width="2"/>
+    <text class="font node-title green" x="1340" y="1176">result.json</text>
+    <line x1="640" y1="1166" x2="688" y2="1166" stroke="#d1fae5" stroke-width="6" marker-end="url(#arrowGray)"/>
+    <line x1="1220" y1="1166" x2="1268" y2="1166" stroke="#d1fae5" stroke-width="6" marker-end="url(#arrowGray)"/>
+  </g>
+
+  <text class="font small white" x="1885" y="1052">状态枚举：queued → claimed → running → completed / failed / timeout / cancelled</text>
+  <text class="font small white" x="1885" y="1092">输出：completion.json、adapter.jsonl、project-relative changed_files</text>
+  <g class="font">
+    <rect x="1885" y="1130" width="250" height="60" rx="16" fill="#ecfdf5"/>
+    <text class="section-label green" x="1920" y="1169">heartbeat</text>
+    <rect x="2160" y="1130" width="250" height="60" rx="16" fill="#ecfdf5"/>
+    <text class="section-label green" x="2195" y="1169">watchdog</text>
+    <rect x="2435" y="1130" width="250" height="60" rx="16" fill="#ecfdf5"/>
+    <text class="section-label green" x="2465" y="1169">restart-safe</text>
+    <rect x="2710" y="1130" width="250" height="60" rx="16" fill="#ecfdf5"/>
+    <text class="section-label green" x="2745" y="1169">idempotent</text>
+  </g>
+  <line x1="1530" y1="1250" x2="1530" y2="1275" stroke="#475569" stroke-width="6" marker-end="url(#arrowGray)"/>
+  <line x1="2990" y1="1120" x2="3060" y2="1120" stroke="#475569" stroke-width="6" marker-end="url(#arrowGray)"/>
+
+  <!-- Band 5 -->
+  <g filter="url(#softShadow)">
+    <rect x="70" y="1275" width="2920" height="320" rx="28" fill="#faf5ff" stroke="#7c3aed" stroke-width="4"/>
+  </g>
+  <text class="font band-title purple" x="110" y="1332">5 后端桥接与 CLI 能力 + 4 Repo 验证夹具</text>
+  <text class="font band-subtitle" x="110" y="1374">OpenClaw/Hermes 负责桥接；Cursor/Codex 负责 ask、plan、agent/code、imagegen 等实际能力</text>
+
+  <rect x="120" y="1410" width="320" height="76" rx="18" fill="#ffffff" stroke="#c084fc" stroke-width="2"/>
+  <text class="font node-title" x="160" y="1459">OpenClaw</text>
+  <rect x="120" y="1498" width="320" height="76" rx="18" fill="#ffffff" stroke="#c084fc" stroke-width="2"/>
+  <text class="font node-title" x="160" y="1547">Hermes</text>
+
+  <rect x="520" y="1410" width="360" height="76" rx="18" fill="#ffffff" stroke="#c084fc" stroke-width="2"/>
+  <text class="font node-title" x="560" y="1459">Cursor CLI</text>
+  <rect x="520" y="1498" width="360" height="76" rx="18" fill="#ffffff" stroke="#c084fc" stroke-width="2"/>
+  <text class="font node-title" x="560" y="1547">Codex CLI</text>
+  <line x1="440" y1="1448" x2="498" y2="1448" stroke="#7c3aed" stroke-width="5" marker-end="url(#arrowGray)"/>
+  <line x1="440" y1="1536" x2="498" y2="1536" stroke="#7c3aed" stroke-width="5" marker-end="url(#arrowGray)"/>
+
+  <rect x="950" y="1405" width="870" height="176" rx="18" fill="#ffffff" stroke="#c084fc" stroke-width="2"/>
+  <text class="font section-label purple" x="985" y="1446">能力矩阵</text>
+  <text class="font small" x="985" y="1476">OpenClaw → Cursor：ask / agent / plan / code ✓</text>
+  <text class="font small" x="985" y="1508">OpenClaw → Codex：ask / agent / plan / code / imagegen ✓</text>
+  <text class="font small" x="985" y="1540">Hermes → Cursor：ask / agent / plan / code ✓</text>
+  <text class="font small" x="985" y="1572">Hermes → Codex：ask / agent / plan / code / imagegen ✓</text>
+
+  <rect x="1860" y="1405" width="1080" height="176" rx="18" fill="#fff7ed" stroke="#f59e0b" stroke-width="2"/>
+  <text class="font section-label warn" x="1900" y="1446">验证夹具：4 Repo Fanout</text>
+  <g class="font small">
+    <text x="1900" y="1488">web：前端 fixture / node --test</text>
+    <text x="2430" y="1488">bff：BFF fixture / node --test</text>
+    <text x="1900" y="1530">api：Express + Vitest / Supertest</text>
+    <text x="2430" y="1530">batch：后台任务 fixture / node --test</text>
+    <text class="muted" x="1900" y="1570">依赖释放：api → bff → web；batch 可并行；父任务由 Fanout Aggregator 终态化</text>
+  </g>
+
+  <text class="font tiny muted" x="1860" y="1392">debug 能力可用；主路径采用 TDD-like 验证。Claude 为未来后端，未纳入当前闭环。</text>
+  <line x1="1530" y1="1595" x2="1530" y2="1620" stroke="#475569" stroke-width="6" marker-end="url(#arrowGray)"/>
+  <line x1="2990" y1="1455" x2="3060" y2="1455" stroke="#475569" stroke-width="6" marker-end="url(#arrowGray)"/>
+
+  <!-- Band 6 -->
+  <g filter="url(#softShadow)">
+    <rect x="70" y="1620" width="2920" height="330" rx="28" fill="#f8fafc" stroke="#0f766e" stroke-width="4"/>
+  </g>
+  <text class="font band-title green" x="110" y="1677">6 基础设施、可观测、记忆与工具</text>
+  <text class="font band-subtitle" x="110" y="1718">运行底座、模型入口、追踪成本、知识沉淀都独立于单个 Agent</text>
+
+  <g>
+    <rect x="110" y="1750" width="675" height="160" rx="18" fill="#ffffff" stroke="#99f6e4" stroke-width="2"/>
+    <text class="font node-title green" x="145" y="1792">LiteLLM</text>
+    <text class="font small" x="145" y="1830">统一模型入口 / fallback</text>
+    <text class="font small" x="145" y="1868">DeepSeek + MiniMax M2.7</text>
+    <text class="font small" x="145" y="1904">budget / routing / callbacks</text>
+
+    <rect x="820" y="1750" width="675" height="160" rx="18" fill="#ffffff" stroke="#99f6e4" stroke-width="2"/>
+    <text class="font node-title green" x="855" y="1792">Langfuse + ClickHouse</text>
+    <text class="font small" x="855" y="1830">trace / token / cost / latency</text>
+    <text class="font small" x="855" y="1868">canonical project repaired</text>
+    <text class="font small" x="855" y="1904">8 traces / 19 observations rollup</text>
+
+    <rect x="1530" y="1750" width="675" height="160" rx="18" fill="#ffffff" stroke="#99f6e4" stroke-width="2"/>
+    <text class="font node-title green" x="1565" y="1792">State Store</text>
+    <text class="font small" x="1565" y="1830">Postgres + Redis + MinIO</text>
+    <text class="font small" x="1565" y="1868">agent/ inbox running done error</text>
+    <text class="font small" x="1565" y="1904">jobs request/status/result</text>
+
+    <rect x="2240" y="1750" width="675" height="160" rx="18" fill="#ffffff" stroke="#99f6e4" stroke-width="2"/>
+    <text class="font node-title green" x="2275" y="1792">Knowledge &amp; Tools</text>
+    <text class="font small" x="2275" y="1830">docs/HANDOFF.md 单一交接源</text>
+    <text class="font small" x="2275" y="1868">skills / MCP / runbooks</text>
+    <text class="font small" x="2275" y="1904">Obsidian 可扩展记忆；Keychain 凭据</text>
+  </g>
+
+  <!-- Bottom validation strip -->
+  <g filter="url(#softShadow)">
+    <rect x="70" y="1985" width="3700" height="120" rx="28" fill="#ecfdf5" stroke="#16a34a" stroke-width="4"/>
+  </g>
+  <text class="font band-title ok" x="115" y="2038">验证结果</text>
+  <text class="font node-title" x="350" y="2038">10-task 全部收敛到终态；3× compose restart 恢复；Langfuse cost/latency 可观测；CLI matrix 8/8 PASS</text>
+  <text class="font small" x="350" y="2082">最新 rollup：$0.017047 / 50,570 tokens / avg 18.244s / P50 16.175s / P95 34.348s；无 stuck inbox/running；Phase 6E Local Runner 为当前执行基线。</text>
+</svg>

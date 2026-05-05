@@ -109,3 +109,83 @@ fs.writeFileSync(outputPath, JSON.stringify(payload), "utf8");
     fs.rmSync(tempRoot, { recursive: true, force: true });
   }
 });
+
+test("codex adapter prefers npm CLI symlink under ~/.local/bin", async () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-adapter-local-bin-"));
+  const previousExecutable = process.env.CODEX_EXECUTABLE;
+  const previousHome = process.env.HOME;
+
+  try {
+    const fakeHome = path.join(tempRoot, "home");
+    const localBin = path.join(fakeHome, ".local", "bin");
+    fs.mkdirSync(localBin, { recursive: true });
+
+    const fakeCodexPath = path.join(localBin, "codex");
+    const fakeCodexScript = `#!/usr/bin/env node
+const fs = require("fs");
+const path = require("path");
+const args = process.argv.slice(2);
+const outIdx = args.indexOf("--output-last-message");
+if (outIdx === -1 || !args[outIdx + 1]) process.exit(2);
+const outputPath = args[outIdx + 1];
+fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+fs.writeFileSync(outputPath, JSON.stringify({
+  task_id: "T-CODEX-LOCAL-BIN",
+  success: true,
+  summary: "local bin codex success",
+  blocker: "none",
+  changed_files: [],
+  commands: [],
+  tests: "",
+  error: ""
+}), "utf8");
+`;
+    fs.writeFileSync(fakeCodexPath, fakeCodexScript, { mode: 0o755 });
+
+    delete process.env.CODEX_EXECUTABLE;
+    process.env.HOME = fakeHome;
+
+    const jobsDir = path.join(tempRoot, "agent", "jobs");
+    const targetRepoAbs = path.join(tempRoot, "target-repos", "api");
+    const planAbs = path.join(tempRoot, "agent", "plan", "task.plan.md");
+    const testPlanAbs = path.join(tempRoot, "agent", "test", "task.test-plan.md");
+    fs.mkdirSync(jobsDir, { recursive: true });
+    fs.mkdirSync(targetRepoAbs, { recursive: true });
+    fs.mkdirSync(path.dirname(planAbs), { recursive: true });
+    fs.mkdirSync(path.dirname(testPlanAbs), { recursive: true });
+    fs.writeFileSync(planAbs, "plan\n", "utf8");
+    fs.writeFileSync(testPlanAbs, "test plan\n", "utf8");
+
+    const events = [];
+    const result = await run(
+      {
+        task_id: "T-CODEX-LOCAL-BIN",
+        target_repo: "target-repos/api",
+        task_brief: "verify resolver",
+        timeout_seconds: 30,
+      },
+      {
+        projectRoot: tempRoot,
+        planAbs,
+        testPlanAbs,
+        targetRepoAbs,
+      },
+      {
+        info: (event, data) => events.push({ event, data }),
+        warn: () => {},
+        error: () => {},
+      },
+    );
+
+    assert.equal(result.state, "completed");
+    const startEvent = events.find((item) => item.event === "codex_exec_start");
+    assert.ok(startEvent);
+    assert.equal(startEvent.data.executable, fakeCodexPath);
+  } finally {
+    if (previousExecutable === undefined) delete process.env.CODEX_EXECUTABLE;
+    else process.env.CODEX_EXECUTABLE = previousExecutable;
+    if (previousHome === undefined) delete process.env.HOME;
+    else process.env.HOME = previousHome;
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+});

@@ -1,0 +1,63 @@
+{
+  "id": "fanout-aggregator",
+  "name": "Fanout Aggregator",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "f31bd6a8-1f9c-4d31-b5ea-cfd3c3d4d049",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const fs = require('fs');\nreturn await eval(`(async () => {${fs.readFileSync('/files/workflows/fanout-aggregator.n8n.js', 'utf8')}\\n})()`);"
+      },
+      "id": "f93c7f04-cba7-4fc1-8c56-d3f1273bcd9c",
+      "name": "Run Fanout Aggregator",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Run Fanout Aggregator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "versionId": "f1cfd69e-02da-468c-b850-d9462db87cfa",
+  "triggerCount": 0,
+  "tags": []
+}

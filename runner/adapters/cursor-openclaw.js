@@ -4,6 +4,12 @@ const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
 
+function normalizeGatewayHostForLocalRunner(rawValue) {
+  if (!rawValue) return rawValue;
+  if (process.platform !== "darwin") return rawValue;
+  return rawValue.replace(/host\.docker\.internal/g, "127.0.0.1");
+}
+
 function getWebSocketCtor() {
   if (typeof WebSocket !== "undefined") return WebSocket;
   try {
@@ -225,11 +231,13 @@ ${testPlan}
 
 async function run(requestPayload, paths, logger) {
   const projectRoot = paths.projectRoot;
-  const gatewayHttp =
-    readEnvVar(projectRoot, "OPENCLAW_GATEWAY_URL") || "http://127.0.0.1:18789";
+  const gatewayHttp = normalizeGatewayHostForLocalRunner(
+    readEnvVar(projectRoot, "OPENCLAW_GATEWAY_URL") || "http://127.0.0.1:18789",
+  );
   const gatewayWs = `${gatewayHttp.replace(/^http/i, "ws").replace(/\/$/, "")}/ws`;
-  const origin =
-    readEnvVar(projectRoot, "OPENCLAW_GATEWAY_ORIGIN") || "http://127.0.0.1";
+  const origin = normalizeGatewayHostForLocalRunner(
+    readEnvVar(projectRoot, "OPENCLAW_GATEWAY_ORIGIN") || "http://127.0.0.1",
+  );
   const token = readEnvVar(projectRoot, "OPENCLAW_GATEWAY_TOKEN");
   const sessionBase = readEnvVar(projectRoot, "OPENCLAW_SESSION_KEY") || "agent:dev:main";
   const sessionKey = `${sessionBase}:${requestPayload.task_id}`;

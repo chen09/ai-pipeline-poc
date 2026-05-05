@@ -29,6 +29,8 @@ agent/error/*
 target-repos/*/node_modules/
 target-repos/*/dist/
 target-repos/*/.env
+target-repos/*/agent/
+target-repos/*/.git.local-backup-*/
 
 agent/archive/
 agent/comms/
