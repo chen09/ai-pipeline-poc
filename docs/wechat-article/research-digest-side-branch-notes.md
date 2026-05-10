@@ -263,3 +263,44 @@ Article angle: operator reports are first-class evidence. Local logs can be
 incomplete or pointed at the wrong process; when the user sees a successful
 agent response, the diagnosis must be revised instead of forcing the old
 interpretation.
+
+## Step 18: Run a Deeper Productization Research Topic
+
+The next manual run used a topic that directly matches the system being built:
+local multi-agent workflow productization. OpenClaw was asked to do public web
+research across coding agents, orchestration frameworks, human-in-the-loop
+operations, durable state, notifications, eval gates, and failure modes.
+
+OpenClaw wrote:
+`agent/research/inbox/2026-05-10-local-multi-agent-productization-openclaw.md`.
+
+Hermes then synthesized the report into:
+
+- `agent/research/processing/2026-W20-local-multi-agent-productization.status.json`
+- `agent/research/done/2026-W20-local-multi-agent-productization-hermes-weekly-digest.md`
+
+The digest recommendation was pragmatic: keep the current
+supervisor-plus-specialist architecture, then add tool-level HITL, eval gates,
+and a bounded fanout benchmark before considering a new control plane.
+
+Article angle: this run turned the workflow back on itself. The research topic
+was not an external feature idea; it was an investigation into how to
+productize the exact local multi-agent operating model we are testing.
+
+## Step 19: Notify Both Surfaces With Different Reliability
+
+OpenClaw notification was direct and reliable: sending to WeCom target `ChenXin`
+succeeded and returned a message id.
+
+Hermes notification used a one-shot `origin` cron job because Hermes does not
+expose the same simple `message send` CLI surface. The job was created with
+repeat count one, manually triggered, and consumed by `hermes cron tick`.
+
+The remaining reliability gap is not the research protocol; it is the Hermes
+gateway service. `hermes cron list` still warns that the gateway is not running,
+so future automatic delivery cannot be treated as reliable until the Hermes
+service startup/logging issue is fixed.
+
+Article angle: two agents can both "receive" a result, but the delivery
+mechanisms can differ. Treating delivery reliability as a first-class part of
+the experiment prevents false confidence.

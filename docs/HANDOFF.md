@@ -1295,3 +1295,13 @@ MANUAL PROTOCOL ADDED
 - Conclusion: manual OpenClaw -> Hermes dispatch works, and WeCom notification works when using the valid inbound direct target `ChenXin`; `self` is not a valid delivery target for this plugin.
 - Follow-up: user reported Hermes received the WeCom prompt as "Test a new periodic job." Hermes created and manually triggered cron job `test-new-job-2` (`job_id: 8dda99b6a438`) with schedule `every 1h` and delivery `origin`.
 - `hermes cron list` confirmed `test-new-job-2` is active and last run was `ok`, but also warned the Hermes gateway service is not running, so automatic future runs may not fire until the Hermes gateway service issue is fixed.
+
+### Manual Deep Research Run: Local Multi-Agent Productization
+- User selected topic: local multi-agent workflow productization.
+- OpenClaw was dispatched through the `research` agent with public web research scope and wrote `agent/research/inbox/2026-05-10-local-multi-agent-productization-openclaw.md` via `research_inbox_write`.
+- Hermes synthesized the OpenClaw report and wrote:
+  - `agent/research/processing/2026-W20-local-multi-agent-productization.status.json`
+  - `agent/research/done/2026-W20-local-multi-agent-productization-hermes-weekly-digest.md`
+- Hermes conclusion: keep the existing supervisor-plus-specialist architecture, add tool-level HITL, eval gates, and a bounded fanout benchmark before adding a new control plane.
+- OpenClaw WeCom notification to `ChenXin` succeeded with message id `aibot_send_msg_1778407259062_96d5274d`.
+- Hermes notification was attempted through a one-shot `origin` cron job `notify-local-multi-agent-digest-20260510` (`job_id: 801d83bacf48`) and manually triggered with `hermes cron tick`; agent logs confirmed the job entered the scheduler. Hermes gateway service still reports not running, so future automatic scheduled delivery remains unreliable until that service issue is fixed.
