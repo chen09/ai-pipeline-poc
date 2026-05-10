@@ -1290,4 +1290,6 @@ MANUAL PROTOCOL ADDED
 - Hermes wrote `agent/research/done/2026-W20-digital-human-manual-hermes-weekly-digest.md`.
 - WeCom plugin was loaded and channel status reported `enabled, configured, running`.
 - `openclaw message send --channel wecom --account default --target self --dry-run` passed, but real send to `self` failed with WeCom `errcode=93006 invalid chatid`.
-- Conclusion: manual OpenClaw -> Hermes dispatch works. WeCom notification needs a real WeCom chat id or a valid inbound conversation target; `self` is not a valid delivery target for this plugin.
+- User then sent `test for new job` to OpenClaw/Hermes from WeCom. Logs identified the valid direct target as `ChenXin`.
+- Notification retry succeeded with `openclaw message send --channel wecom --account default --target ChenXin ...`; returned `chatId: ChenXin`.
+- Conclusion: manual OpenClaw -> Hermes dispatch works, and WeCom notification works when using the valid inbound direct target `ChenXin`; `self` is not a valid delivery target for this plugin.

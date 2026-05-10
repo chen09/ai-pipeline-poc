@@ -229,3 +229,13 @@ chat id or a valid inbound conversation target.
 Article angle: notification systems have two separate states: "channel is
 connected" and "this target is deliverable." Treating them as the same state is
 how agents silently lose reports.
+
+## Step 16: Use an Inbound WeCom Conversation as the Target
+
+The user sent `test for new job` from WeCom. The channel logs showed the direct
+conversation as `chat: ChenXin user: ChenXin`. Retrying the notification with
+`--target ChenXin` succeeded and returned `chatId: ChenXin`.
+
+Article angle: the reliable way to establish a chat target is to let the user
+create an inbound conversation first, then reuse the target that the channel
+adapter actually observes. This is safer than inventing aliases like `self`.
