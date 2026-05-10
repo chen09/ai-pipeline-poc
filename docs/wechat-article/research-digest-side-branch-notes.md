@@ -128,3 +128,50 @@ Article angle: the protocol was correct, but the agent capability boundary was
 not. OpenClaw can be the radar, but the first implementation may need Codex or a
 small bridge to persist OpenClaw output. Testing the loop revealed the missing
 adapter before any cron or n8n automation was added.
+
+## Step 10: Add a Restricted Persistence Bridge
+
+The next test was to remove Codex from the middle of the OpenClaw write path
+without giving OpenClaw a general-purpose shell or arbitrary file writer. The
+chosen design was a tiny OpenClaw plugin with exactly one tool:
+`research_inbox_write`.
+
+The tool writes only into `agent/research/inbox/`, accepts only filenames like
+`YYYY-MM-DD-topic-openclaw.md`, rejects path separators, requires the standard
+OpenClaw report heading, and uses create-only file writes so an existing report
+is not silently overwritten.
+
+Article angle: the useful bridge is not "let the research agent write files."
+The useful bridge is "let it write one kind of artifact to one controlled
+inbox." That preserves the research/coding boundary and keeps `agent/jobs/`
+untouched.
+
+## Step 11: Diagnose the Tool Policy Boundary
+
+The first plugin load looked successful: `openclaw plugins inspect` showed
+`research-inbox-writer` loaded and listed `research_inbox_write`. But the
+research agent still said the tool was unavailable.
+
+The reason was OpenClaw's tool policy layering. The global `tools.allow` was an
+explicit whitelist. In that mode, an agent-level `alsoAllow` entry cannot enable
+a tool that is missing from the global whitelist. Adding
+`research_inbox_write` to the global whitelist made the plugin tool visible to
+the embedded research agent.
+
+Article angle: in local-agent systems, "plugin loaded" and "agent can call the
+tool" are different states. The missing layer was not JavaScript code; it was
+the policy gate between registered tools and runtime-visible tools.
+
+## Step 12: Verify the Bridge With a Real Agent Call
+
+The smoke test asked the OpenClaw `research` agent to call
+`research_inbox_write` once and create
+`agent/research/inbox/2026-05-10-plugin-smoke-openclaw.md`.
+
+The test passed. This confirms that OpenClaw can now perform the first durable
+write in the research digest protocol without Codex manually persisting the
+report.
+
+Article angle: the architecture advanced by one small bridge, not by wiring the
+whole system into cron or n8n. The next proof should be repeated real reports,
+not broader automation.

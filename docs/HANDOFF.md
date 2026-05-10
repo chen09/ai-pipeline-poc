@@ -1271,3 +1271,11 @@ MANUAL PROTOCOL ADDED
 - Hermes successfully wrote `agent/research/done/2026-W20-digital-human-hermes-weekly-digest.md`.
 - Observed integration gap: OpenClaw `research` agent did not write the file directly during this run. The successful path was OpenClaw returns Markdown -> Codex persists inbox artifact -> Hermes reads and synthesizes.
 - This confirms the manual research digest loop is viable, while showing that any future automation needs an explicit persistence bridge for OpenClaw output.
+
+### OpenClaw Persistence Bridge Test
+- Added a restricted plugin source under `openclaw-plugins/research-inbox-writer/`.
+- The plugin exposes one tool, `research_inbox_write`, which only writes Markdown files matching `YYYY-MM-DD-topic-openclaw.md` under `agent/research/inbox/`.
+- The tool refuses path separators, refuses non-matching filenames, refuses reports that do not include `# OpenClaw Daily Discovery Report`, and uses no shell execution.
+- Local OpenClaw config was updated to enable the plugin and allow `research_inbox_write` for the `research` agent. Because the global `tools.allow` is an explicit whitelist, `research_inbox_write` also had to be added there; agent-level `alsoAllow` alone was not enough.
+- Smoke test passed with `openclaw agent --local --agent research --session-id research-inbox-writer-smoke-20260510-v5 --timeout 180`: OpenClaw created `agent/research/inbox/2026-05-10-plugin-smoke-openclaw.md` through the plugin.
+- This bridge does not alter n8n, Local Runner, `agent/jobs/`, provider credentials, or target repo fixtures.
