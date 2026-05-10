@@ -1250,3 +1250,76 @@ PUBLISHED TO GITHUB
 - The GitHub upload is complete; do not reinitialize or recreate the remote.
 - If future edits touch target fixtures, remember `target-repos/api` is now source managed by the parent repo, not by its former nested Git metadata.
 - Keep future continuity notes appended to this file; do not create a root-level handoff file.
+
+## 28. Research Digest Side Branch Protocol (2026-05-10)
+
+### Status
+MANUAL PROTOCOL ADDED
+
+### Summary
+- Added `agent/research/` as a separate manual research digest side branch.
+- Intended flow: OpenClaw daily discovery -> Hermes weekly synthesis -> human-reviewed action list / Codex or Cursor execution prompt -> Hermes conclusion write-back.
+- Role split: OpenClaw is the external-world radar, Hermes is the personal knowledge base and project manager, and Codex/Cursor are engineering executors.
+- Added copyable prompt templates under `agent/research/templates/` for OpenClaw daily discovery, Hermes weekly synthesis, Codex/Cursor validation, and weekly status JSON.
+- This is intentionally separate from the coding implementation pipeline.
+- No changes were made to `agent/jobs/`, n8n workflows, Local Runner logic, provider config, credentials, gateway config, or `target-repos/*`.
+- Version 1 is file-protocol only. Prefer high-quality daily reports plus one weekly Hermes review; after three useful manual weekly reviews, consider whether n8n or Local Runner automation is justified.
+
+### First Flow Test
+- Created real test artifact `agent/research/inbox/2026-05-10-digital-human-openclaw.md` from OpenClaw's returned Markdown discovery report.
+- Hermes successfully wrote `agent/research/processing/2026-W20-digital-human.status.json`.
+- Hermes successfully wrote `agent/research/done/2026-W20-digital-human-hermes-weekly-digest.md`.
+- Observed integration gap: OpenClaw `research` agent did not write the file directly during this run. The successful path was OpenClaw returns Markdown -> Codex persists inbox artifact -> Hermes reads and synthesizes.
+- This confirms the manual research digest loop is viable, while showing that any future automation needs an explicit persistence bridge for OpenClaw output.
+
+### OpenClaw Persistence Bridge Test
+- Added a restricted plugin source under `openclaw-plugins/research-inbox-writer/`.
+- The plugin exposes one tool, `research_inbox_write`, which only writes Markdown files matching `YYYY-MM-DD-topic-openclaw.md` under `agent/research/inbox/`.
+- The tool refuses path separators, refuses non-matching filenames, refuses reports that do not include `# OpenClaw Daily Discovery Report`, and uses no shell execution.
+- Local OpenClaw config was updated to enable the plugin and allow `research_inbox_write` for the `research` agent. Because the global `tools.allow` is an explicit whitelist, `research_inbox_write` also had to be added there; agent-level `alsoAllow` alone was not enough.
+- Smoke test passed with `openclaw agent --local --agent research --session-id research-inbox-writer-smoke-20260510-v5 --timeout 180`: OpenClaw created `agent/research/inbox/2026-05-10-plugin-smoke-openclaw.md` through the plugin.
+- Gateway was restarted with `openclaw gateway restart` after user approval. Post-restart status showed connectivity `ok` and capability `admin-capable`.
+- Gateway-path smoke test passed with `openclaw agent --agent research --session-id research-inbox-writer-gateway-smoke-20260510-v1 --timeout 180`: OpenClaw created `agent/research/inbox/2026-05-10-gateway-smoke-openclaw.md` through the plugin.
+- This bridge does not alter n8n, Local Runner, `agent/jobs/`, provider credentials, or target repo fixtures.
+
+### Manual Dispatch + WeCom Notification Trial
+- Manually dispatched OpenClaw through the gateway for topic `digital-human-manual`.
+- OpenClaw wrote `agent/research/inbox/2026-05-10-digital-human-manual-openclaw.md`.
+- Manually dispatched Hermes with the OpenClaw report as input.
+- Hermes wrote `agent/research/processing/2026-W20-digital-human-manual.status.json`.
+- Hermes wrote `agent/research/done/2026-W20-digital-human-manual-hermes-weekly-digest.md`.
+- WeCom plugin was loaded and channel status reported `enabled, configured, running`.
+- `openclaw message send --channel wecom --account default --target self --dry-run` passed, but real send to `self` failed with WeCom `errcode=93006 invalid chatid`.
+- User then sent `test for new job` to OpenClaw/Hermes from WeCom. Logs identified the valid direct target as `ChenXin`.
+- Notification retry succeeded with `openclaw message send --channel wecom --account default --target ChenXin ...`; returned `chatId: ChenXin`.
+- Conclusion: manual OpenClaw -> Hermes dispatch works, and WeCom notification works when using the valid inbound direct target `ChenXin`; `self` is not a valid delivery target for this plugin.
+- Follow-up: user reported Hermes received the WeCom prompt as "Test a new periodic job." Hermes created and manually triggered cron job `test-new-job-2` (`job_id: 8dda99b6a438`) with schedule `every 1h` and delivery `origin`.
+- `hermes cron list` confirmed `test-new-job-2` is active and last run was `ok`, but also warned the Hermes gateway service is not running, so automatic future runs may not fire until the Hermes gateway service issue is fixed.
+
+### Manual Deep Research Run: Local Multi-Agent Productization
+- User selected topic: local multi-agent workflow productization.
+- OpenClaw was dispatched through the `research` agent with public web research scope and wrote `agent/research/inbox/2026-05-10-local-multi-agent-productization-openclaw.md` via `research_inbox_write`.
+- Hermes synthesized the OpenClaw report and wrote:
+  - `agent/research/processing/2026-W20-local-multi-agent-productization.status.json`
+  - `agent/research/done/2026-W20-local-multi-agent-productization-hermes-weekly-digest.md`
+- Hermes conclusion: keep the existing supervisor-plus-specialist architecture, add tool-level HITL, eval gates, and a bounded fanout benchmark before adding a new control plane.
+- OpenClaw WeCom notification to `ChenXin` succeeded with message id `aibot_send_msg_1778407259062_96d5274d`.
+- Hermes notification was attempted through a one-shot `origin` cron job `notify-local-multi-agent-digest-20260510` (`job_id: 801d83bacf48`) and manually triggered with `hermes cron tick`; agent logs confirmed the job entered the scheduler. Hermes gateway service still reports not running, so future automatic scheduled delivery remains unreliable until that service issue is fixed.
+- Added `agent/research/templates/wecom-digest-notification-cn.md` to standardize Chinese WeCom notifications. It keeps full execution prompts in Markdown files and sends readable conclusions, priorities, next actions, and archive paths in chat.
+- Hermes gateway launchd diagnosis: service failed when launchd wrote stdout/stderr to `/Volumes/WDC2T/Applications/hermes-home/logs/*` (`operation not permitted`). Backed up the launchd plist and wrapper, then changed launchd stdout/stderr to `~/Library/Logs/hermes-gateway-service.*.log`. After reload, the Hermes gateway service was loaded with a live PID, but Hermes CLI still warns the service definition is stale and `hermes cron status` still reports gateway not running. Treat this as improved but not fully resolved.
+
+### Research Mode Runbook + Roundup
+- Added `agent/research/RUNBOOK.md` to define manual Research Mode and explicitly separate it from Validation Mode.
+- Updated `agent/research/templates/wecom-digest-notification-cn.md` so WeCom notifications default to Chinese readable summaries and do not imply engineering validation unless the user explicitly chooses Validation Mode.
+- Hermes created `agent/research/done/2026-W20-research-mode-roundup.md` from existing digital-human and local multi-agent productization research artifacts.
+- Roundup conclusion: keep research mode for now; stabilize control-plane evidence and human-readable summaries before scaling automation or running development experiments.
+- Sent the roundup Chinese summary to OpenClaw WeCom target `ChenXin`; message id `aibot_send_msg_1778410677319_c73bea13`.
+
+### Research Run: GitHub AI Trends
+- User selected next Research Mode topic: popular AI-related GitHub content, with priority for paper-backed repos, multi-agent collaboration, skills/MCP/tool ecosystems, AI usage methods, second brain/memory/PKM, and recent closed/open model rankings.
+- OpenClaw wrote `agent/research/inbox/2026-05-10-github-ai-trends-openclaw.md`.
+- Hermes wrote:
+  - `agent/research/processing/2026-W20-github-ai-trends.status.json`
+  - `agent/research/done/2026-W20-github-ai-trends-hermes-digest.md`
+- Hermes conclusion: AI engineering ecosystem is entering a protocol/engineering convergence phase; MCP is becoming the practical tool-interoperability standard; model rankings should be interpreted by task layer, not as a single global winner.
+- Sent Chinese WeCom summary to `ChenXin`; message id `aibot_send_msg_1778413045344_c17e0850`.

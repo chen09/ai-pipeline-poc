@@ -1,0 +1,10 @@
+{
+  "state": "done",
+  "owner": "hermes",
+  "week": "2026-W20",
+  "topic": "local-multi-agent-productization",
+  "inputs": ["agent/research/inbox/2026-05-10-local-multi-agent-productization-openclaw.md"],
+  "output": "agent/research/done/2026-W20-local-multi-agent-productization-hermes-weekly-digest.md",
+  "updated_at": "2026-05-10T09:44:04Z",
+  "notes": "OpenClaw deep research synthesized into productization priorities."
+}

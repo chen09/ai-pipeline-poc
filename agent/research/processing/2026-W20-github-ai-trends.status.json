@@ -1,0 +1,10 @@
+{
+  "state": "done",
+  "owner": "hermes",
+  "week": "2026-W20",
+  "topic": "github-ai-trends",
+  "inputs": ["agent/research/inbox/2026-05-10-github-ai-trends-openclaw.md"],
+  "output": "agent/research/done/2026-W20-github-ai-trends-hermes-digest.md",
+  "updated_at": "2026-05-10T11:32:30Z",
+  "notes": "GitHub AI trends research synthesized in Research Mode."
+}

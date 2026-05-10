@@ -1,0 +1,17 @@
+{
+  "id": "research-inbox-writer",
+  "name": "Research Inbox Writer",
+  "description": "Restricted OpenClaw tool for writing Markdown discovery reports into ai-pipeline-poc agent/research/inbox only.",
+  "version": "0.1.0",
+  "main": "index.js",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "projectRoot": {
+        "type": "string",
+        "description": "Absolute ai-pipeline-poc project root. Defaults to /Volumes/WDC2T/Project/ai-pipeline-poc."
+      }
+    }
+  }
+}
