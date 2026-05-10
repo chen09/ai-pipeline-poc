@@ -1,0 +1,10 @@
+{
+  "state": "done",
+  "owner": "hermes",
+  "week": "2026-W20",
+  "topic": "digital-human-manual",
+  "inputs": ["agent/research/inbox/2026-05-10-digital-human-manual-openclaw.md"],
+  "output": "agent/research/done/2026-W20-digital-human-manual-hermes-weekly-digest.md",
+  "updated_at": "2026-05-10T08:34:46Z",
+  "notes": "Manual OpenClaw report synthesized into weekly priorities."
+}

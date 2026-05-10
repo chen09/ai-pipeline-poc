@@ -191,3 +191,41 @@ restricted plugin.
 Article angle: local validation and gateway validation are different proof
 levels. The gateway restart converted the bridge from "works in embedded test"
 to "works on the real OpenClaw service path."
+
+## Step 14: Run a Manual Dispatch End to End
+
+After the gateway path was verified, the next useful proof was a real manual
+dispatch instead of another smoke file. OpenClaw was asked to research the
+`digital-human-manual` topic and write the report through the restricted inbox
+plugin.
+
+OpenClaw completed the report and wrote:
+`agent/research/inbox/2026-05-10-digital-human-manual-openclaw.md`.
+
+Hermes then read that report and wrote:
+
+- `agent/research/processing/2026-W20-digital-human-manual.status.json`
+- `agent/research/done/2026-W20-digital-human-manual-hermes-weekly-digest.md`
+
+The digest made a concrete recommendation: start with Mac mini local baselines
+around SadTalker/Wav2Lip, and treat CUDA-heavy diffusion avatar models as
+cloud/GPU fallback until local feasibility is proven.
+
+Article angle: this is the first real operator loop. It is not fully automated,
+but it already has the shape of a working system: external radar, synthesis,
+action prompt, and durable files.
+
+## Step 15: Separate WeCom Connectivity From Delivery Target
+
+The WeCom plugin was loaded and channel status showed it was enabled,
+configured, and running. A dry-run message using `--channel wecom --target self`
+also passed at the OpenClaw CLI layer.
+
+The actual send failed with WeCom `errcode=93006 invalid chatid`. That means
+the bridge to WeCom is alive, but `self` is not a valid delivery target for this
+plugin. The missing piece is not research automation; it is a concrete WeCom
+chat id or a valid inbound conversation target.
+
+Article angle: notification systems have two separate states: "channel is
+connected" and "this target is deliverable." Treating them as the same state is
+how agents silently lose reports.
