@@ -143,6 +143,9 @@ Copyable prompts and status templates for running the protocol manually.
   becomes an engineering validation task.
 - `weekly-status.example.json`: example `processing/` status payload for a
   weekly Hermes review.
+- `wecom-digest-notification-cn.md`: use this shape for Chinese WeCom
+  notifications so the result is readable in chat; file paths are archive
+  references only.
 
 ## Expected Manual Flow
 

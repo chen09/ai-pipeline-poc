@@ -1,0 +1,82 @@
+{
+  "benchmark_id": "2026-W20-local-multi-agent-productization-controls",
+  "objective": "Validate bounded fanout and control policies before introducing a new control plane",
+  "baseline_architecture": {
+    "supervisor": "n8n workflows",
+    "state_source_of_truth": "agent/jobs",
+    "implementation_backend": "cursor-openclaw adapter",
+    "control_constraints": [
+      "No provider/credential changes",
+      "No topology changes",
+      "No ownership change for agent/jobs"
+    ]
+  },
+  "task_set": {
+    "cohort_name": "fixed-regression-cohort-v1",
+    "selection_rules": [
+      "Include easy/medium/hard and one known-fail task",
+      "Keep identical task mix across all parallelism levels",
+      "Use deterministic seed artifacts"
+    ],
+    "task_ids": [
+      "task_001",
+      "task_002",
+      "task_003",
+      "01PH6DFANOUT000000000012",
+      "01PH6DFANOUT000000000013"
+    ],
+    "max_runtime_seconds_per_task": 1800
+  },
+  "experiment_matrix": {
+    "parallelism_levels": [1, 2, 4],
+    "repetitions_per_level": 2,
+    "execution_order": "1 -> 2 -> 4",
+    "cooldown_seconds_between_runs": 120
+  },
+  "metrics_schema": {
+    "success_rate": "number",
+    "duplicate_rate": "number",
+    "p50_latency_s": "number",
+    "p95_latency_s": "number",
+    "retry_rate": "number",
+    "manual_intervention_count": "integer",
+    "estimated_cost": "number"
+  },
+  "acceptance_thresholds": {
+    "success_rate_min": 0.9,
+    "duplicate_rate_max": 0.0,
+    "p95_latency_s_max": 900,
+    "retry_rate_max": 0.35,
+    "manual_intervention_count_max": 1,
+    "estimated_cost_max": 2.0,
+    "stuck_tasks_allowed": 0
+  },
+  "determinism_checks": [
+    "No task loss between inbox/running/done/error",
+    "No concurrent active duplicate for same task_id",
+    "Terminal proof artifacts complete for every terminal task"
+  ],
+  "outputs": {
+    "per_run_report_template": "agent/research/done/2026-W20-validation-checklist.md",
+    "summary_fields": [
+      "parallelism_level",
+      "run_id",
+      "cohort_size",
+      "done_count",
+      "error_count",
+      "stuck_count",
+      "metrics",
+      "incidents",
+      "gate_result"
+    ]
+  },
+  "gate_decision": {
+    "pass": "All thresholds met at parallelism 1 and 2, and no critical policy incidents at 4",
+    "hold": "Any threshold violation or unresolved critical incident",
+    "rollback": "Duplicate/loss evidence or missing terminal-proof contract"
+  },
+  "assumptions": [
+    "Historical task IDs used as references may require remapping to active fixture IDs",
+    "Estimated cost may require proxy values if full token billing is unavailable"
+  ]
+}

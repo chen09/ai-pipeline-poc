@@ -304,3 +304,38 @@ service startup/logging issue is fixed.
 Article angle: two agents can both "receive" a result, but the delivery
 mechanisms can differ. Treating delivery reliability as a first-class part of
 the experiment prevents false confidence.
+
+## Step 20: Make WeCom Notifications Readable
+
+The first Hermes notification delivered an execution-style response in English.
+It listed files that were created, but the user could not understand the result
+inside WeCom without opening the local Markdown files.
+
+The fix is a separate Chinese notification template:
+`agent/research/templates/wecom-digest-notification-cn.md`.
+
+The rule is simple: WeCom should carry a readable Chinese conclusion, priorities,
+next action, and archive paths. Full Codex/Cursor execution prompts stay in the
+Markdown digest, not in the chat notification.
+
+Article angle: notification is a user interface, not just delivery plumbing. A
+message that technically arrives can still fail if it is not readable at the
+place where the user receives it.
+
+## Step 21: Improve Hermes Gateway Startup, But Mark Residual Risk
+
+Hermes gateway service instability was traced to launchd writing stdout/stderr
+to the external-drive Hermes log directory. The error was `operation not
+permitted` when writing `gateway.log`.
+
+The service plist and wrapper were backed up. The plist stdout/stderr paths were
+changed to `~/Library/Logs/hermes-gateway-service.*.log`, leaving `HERMES_HOME`
+on the external drive. After reload, launchd showed the gateway service loaded
+with a live PID.
+
+Residual risk remains: Hermes CLI still reports the service definition as stale,
+and `hermes cron status` still says the gateway is not running. So this is an
+improvement, not a completed reliability fix.
+
+Article angle: operational fixes should have states beyond pass/fail. Here the
+right status is "startup blocker improved, scheduler reliability not yet proven."
