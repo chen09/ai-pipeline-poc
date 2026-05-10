@@ -1250,3 +1250,15 @@ PUBLISHED TO GITHUB
 - The GitHub upload is complete; do not reinitialize or recreate the remote.
 - If future edits touch target fixtures, remember `target-repos/api` is now source managed by the parent repo, not by its former nested Git metadata.
 - Keep future continuity notes appended to this file; do not create a root-level handoff file.
+
+## 28. Research Digest Side Branch Protocol (2026-05-10)
+
+### Status
+MANUAL PROTOCOL ADDED
+
+### Summary
+- Added `agent/research/` as a separate manual research digest side branch.
+- Intended flow: OpenClaw discovery report -> Hermes digest -> human-reviewed action list / Codex or Cursor execution prompt.
+- This is intentionally separate from the coding implementation pipeline.
+- No changes were made to `agent/jobs/`, n8n workflows, Local Runner logic, provider config, credentials, gateway config, or `target-repos/*`.
+- Version 1 is file-protocol only. After three useful manual runs, consider whether n8n or Local Runner automation is justified.
