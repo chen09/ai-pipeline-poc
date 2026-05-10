@@ -379,3 +379,29 @@ The Chinese roundup summary was sent to OpenClaw WeCom target `ChenXin`.
 Article angle: roundup is the missing middle step between daily research and
 engineering work. It converts scattered reports into a small set of human
 decisions.
+
+## Step 24: Research GitHub AI Trends as a Radar Topic
+
+The next Research Mode topic focused on popular AI-related GitHub content. The
+user asked to prioritize paper-backed repositories, implementations of papers,
+multi-agent collaboration, skills/MCP/tool ecosystems, AI usage methods, second
+brain/memory systems, and recent closed/open model ranking signals.
+
+OpenClaw wrote:
+`agent/research/inbox/2026-05-10-github-ai-trends-openclaw.md`.
+
+Hermes synthesized it into:
+
+- `agent/research/processing/2026-W20-github-ai-trends.status.json`
+- `agent/research/done/2026-W20-github-ai-trends-hermes-digest.md`
+
+The digest conclusion was that AI engineering is entering a protocol and
+engineering convergence phase: MCP is becoming a practical tool interoperability
+standard, paper-backed open models and infrastructure matter, and leaderboards
+must be interpreted by task layer rather than treated as one global truth.
+
+The Chinese WeCom summary was sent to `ChenXin`.
+
+Article angle: a good radar topic is not "what is trending" in isolation. It
+filters trends through the local workflow's needs: paper backing, agent
+collaboration, tool protocols, memory, and model strategy.

@@ -1314,3 +1314,12 @@ MANUAL PROTOCOL ADDED
 - Hermes created `agent/research/done/2026-W20-research-mode-roundup.md` from existing digital-human and local multi-agent productization research artifacts.
 - Roundup conclusion: keep research mode for now; stabilize control-plane evidence and human-readable summaries before scaling automation or running development experiments.
 - Sent the roundup Chinese summary to OpenClaw WeCom target `ChenXin`; message id `aibot_send_msg_1778410677319_c73bea13`.
+
+### Research Run: GitHub AI Trends
+- User selected next Research Mode topic: popular AI-related GitHub content, with priority for paper-backed repos, multi-agent collaboration, skills/MCP/tool ecosystems, AI usage methods, second brain/memory/PKM, and recent closed/open model rankings.
+- OpenClaw wrote `agent/research/inbox/2026-05-10-github-ai-trends-openclaw.md`.
+- Hermes wrote:
+  - `agent/research/processing/2026-W20-github-ai-trends.status.json`
+  - `agent/research/done/2026-W20-github-ai-trends-hermes-digest.md`
+- Hermes conclusion: AI engineering ecosystem is entering a protocol/engineering convergence phase; MCP is becoming the practical tool-interoperability standard; model rankings should be interpreted by task layer, not as a single global winner.
+- Sent Chinese WeCom summary to `ChenXin`; message id `aibot_send_msg_1778413045344_c17e0850`.
