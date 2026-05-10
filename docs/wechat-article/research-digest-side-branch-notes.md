@@ -175,3 +175,19 @@ report.
 Article angle: the architecture advanced by one small bridge, not by wiring the
 whole system into cron or n8n. The next proof should be repeated real reports,
 not broader automation.
+
+## Step 13: Restart the Gateway and Test the Real Path
+
+The first successful write used `openclaw agent --local`, which proves the
+embedded agent path. The next question was whether the long-running OpenClaw
+gateway would pick up the new plugin and tool policy.
+
+After user approval, the gateway was restarted. The post-restart status showed
+the LaunchAgent running, loopback connectivity working, and admin capability
+available. A non-local `openclaw agent --agent research` smoke test then wrote
+`agent/research/inbox/2026-05-10-gateway-smoke-openclaw.md` through the same
+restricted plugin.
+
+Article angle: local validation and gateway validation are different proof
+levels. The gateway restart converted the bridge from "works in embedded test"
+to "works on the real OpenClaw service path."

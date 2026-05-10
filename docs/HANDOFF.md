@@ -1278,4 +1278,6 @@ MANUAL PROTOCOL ADDED
 - The tool refuses path separators, refuses non-matching filenames, refuses reports that do not include `# OpenClaw Daily Discovery Report`, and uses no shell execution.
 - Local OpenClaw config was updated to enable the plugin and allow `research_inbox_write` for the `research` agent. Because the global `tools.allow` is an explicit whitelist, `research_inbox_write` also had to be added there; agent-level `alsoAllow` alone was not enough.
 - Smoke test passed with `openclaw agent --local --agent research --session-id research-inbox-writer-smoke-20260510-v5 --timeout 180`: OpenClaw created `agent/research/inbox/2026-05-10-plugin-smoke-openclaw.md` through the plugin.
+- Gateway was restarted with `openclaw gateway restart` after user approval. Post-restart status showed connectivity `ok` and capability `admin-capable`.
+- Gateway-path smoke test passed with `openclaw agent --agent research --session-id research-inbox-writer-gateway-smoke-20260510-v1 --timeout 180`: OpenClaw created `agent/research/inbox/2026-05-10-gateway-smoke-openclaw.md` through the plugin.
 - This bridge does not alter n8n, Local Runner, `agent/jobs/`, provider credentials, or target repo fixtures.
