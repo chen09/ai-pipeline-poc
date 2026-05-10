@@ -1264,3 +1264,10 @@ MANUAL PROTOCOL ADDED
 - This is intentionally separate from the coding implementation pipeline.
 - No changes were made to `agent/jobs/`, n8n workflows, Local Runner logic, provider config, credentials, gateway config, or `target-repos/*`.
 - Version 1 is file-protocol only. Prefer high-quality daily reports plus one weekly Hermes review; after three useful manual weekly reviews, consider whether n8n or Local Runner automation is justified.
+
+### First Flow Test
+- Created real test artifact `agent/research/inbox/2026-05-10-digital-human-openclaw.md` from OpenClaw's returned Markdown discovery report.
+- Hermes successfully wrote `agent/research/processing/2026-W20-digital-human.status.json`.
+- Hermes successfully wrote `agent/research/done/2026-W20-digital-human-hermes-weekly-digest.md`.
+- Observed integration gap: OpenClaw `research` agent did not write the file directly during this run. The successful path was OpenClaw returns Markdown -> Codex persists inbox artifact -> Hermes reads and synthesizes.
+- This confirms the manual research digest loop is viable, while showing that any future automation needs an explicit persistence bridge for OpenClaw output.

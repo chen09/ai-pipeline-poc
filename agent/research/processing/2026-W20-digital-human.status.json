@@ -1,0 +1,31 @@
+{
+  "week": "2026-W20",
+  "topic": "digital-human",
+  "owner": "Hermes",
+  "inputs": [
+    "agent/research/inbox/2026-05-10-digital-human-openclaw.md"
+  ],
+  "outputs": {
+    "digest": "agent/research/done/2026-W20-digital-human-hermes-weekly-digest.md"
+  },
+  "generated_at_utc": "2026-05-10T06:10:23Z",
+  "status": "completed",
+  "summary": {
+    "deduplicated_findings": 9,
+    "poc_actions": 6,
+    "worth_trying": 4,
+    "watching": 4,
+    "not_investing_now": 3
+  },
+  "constraints_applied": [
+    "No provider changes",
+    "No credential changes",
+    "No launchd changes",
+    "No gateway changes",
+    "No n8n changes",
+    "No Local Runner changes",
+    "No agent/jobs changes",
+    "WeCom not treated as queue state"
+  ],
+  "notes": "Digest synthesized strictly from the provided OpenClaw discovery report; no private links/accounts/credentials included."
+}

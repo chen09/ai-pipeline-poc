@@ -107,3 +107,24 @@ Local Runner automation.
 
 Article angle: in an agent workflow, a good prompt template is not just text. It
 is an API contract for another agent.
+
+## Step 9: Run the First Real Flow Test
+
+The first live test exposed an important integration detail. Asking OpenClaw to
+both research and write the inbox file did not work on the first pass:
+
+- First attempt: OpenClaw Gateway timed out after a long run.
+- Fallback attempt: the OpenClaw `research` agent hit a session lock.
+- Second attempt with a new session id avoided the lock, but the `research`
+  agent did not have a file-writing tool available.
+- Third attempt changed the contract: OpenClaw returned the Markdown report,
+  and Codex persisted it to `agent/research/inbox/`.
+
+Hermes then successfully read the OpenClaw report, wrote a status JSON under
+`agent/research/processing/`, and generated a weekly digest under
+`agent/research/done/`.
+
+Article angle: the protocol was correct, but the agent capability boundary was
+not. OpenClaw can be the radar, but the first implementation may need Codex or a
+small bridge to persist OpenClaw output. Testing the loop revealed the missing
+adapter before any cron or n8n automation was added.
