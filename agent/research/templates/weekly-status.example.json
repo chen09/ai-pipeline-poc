@@ -1,0 +1,13 @@
+{
+  "state": "processing",
+  "owner": "hermes",
+  "week": "2026-W20",
+  "topic": "digital-human",
+  "inputs": [
+    "agent/research/inbox/2026-05-10-digital-human-openclaw.md",
+    "agent/research/inbox/2026-05-11-digital-human-openclaw.md"
+  ],
+  "output": "agent/research/done/2026-W20-digital-human-hermes-weekly-digest.md",
+  "updated_at": "2026-05-10T00:00:00Z",
+  "notes": "Deduplicating daily reports and grouping weekly priorities."
+}

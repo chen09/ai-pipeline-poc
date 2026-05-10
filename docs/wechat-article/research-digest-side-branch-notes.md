@@ -92,3 +92,18 @@ research from becoming a pile of disconnected links.
 Article angle: the important loop is not "search automatically." It is
 "discover, synthesize, validate, write back." The write-back step is what turns
 research into accumulated judgment.
+
+## Step 8: Turn the Role Split Into Copyable Prompts
+
+After the role split was clear, the next implementation step was to stop leaving
+the workflow as architecture prose. The protocol now includes prompt templates
+for OpenClaw daily discovery, Hermes weekly synthesis, and Codex/Cursor
+validation.
+
+This matters because prompts are the operational interface between agents. The
+same file protocol can fail if each run asks for a different shape of output.
+Templates make the loop repeatable without prematurely wiring n8n, cron, or
+Local Runner automation.
+
+Article angle: in an agent workflow, a good prompt template is not just text. It
+is an API contract for another agent.

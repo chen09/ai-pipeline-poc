@@ -50,7 +50,8 @@ agent/research/
 ├── processing/
 ├── done/
 ├── archive/
-└── examples/
+├── examples/
+└── templates/
 ```
 
 ### `inbox/`
@@ -130,6 +131,19 @@ Fake examples that describe the expected shape of OpenClaw input and Hermes
 digest output. Examples must not contain real private accounts, credentials, or
 private source material.
 
+### `templates/`
+
+Copyable prompts and status templates for running the protocol manually.
+
+- `openclaw-daily-discovery-prompt.md`: give this to OpenClaw for daily radar
+  reports.
+- `hermes-weekly-synthesis-prompt.md`: give this to Hermes for weekly
+  synthesis.
+- `codex-cursor-validation-prompt.md`: use this shape when a Hermes action item
+  becomes an engineering validation task.
+- `weekly-status.example.json`: example `processing/` status payload for a
+  weekly Hermes review.
+
 ## Expected Manual Flow
 
 1. OpenClaw writes daily discovery reports to `inbox/`.
@@ -143,6 +157,21 @@ private source material.
 7. Hermes writes back the validation conclusion and next step in the next digest
    or a follow-up note.
 8. Old artifacts can be moved to `archive/` when they are no longer active.
+
+## First Manual Run
+
+Use these steps for the first real run:
+
+1. Copy `templates/openclaw-daily-discovery-prompt.md` into OpenClaw and fill in
+   the date, topic, and output path.
+2. Save OpenClaw's output under `inbox/`.
+3. Repeat daily until there are enough reports for a weekly review.
+4. Copy `templates/hermes-weekly-synthesis-prompt.md` into Hermes and list the
+   input report paths.
+5. Save Hermes's status JSON under `processing/` and final digest under `done/`.
+6. Copy one selected action into `templates/codex-cursor-validation-prompt.md`
+   and give that prompt to Codex or Cursor.
+7. Feed the validation result back into the next Hermes weekly digest.
 
 ## Hermes Digest Shape
 

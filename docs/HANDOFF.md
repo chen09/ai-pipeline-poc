@@ -1260,6 +1260,7 @@ MANUAL PROTOCOL ADDED
 - Added `agent/research/` as a separate manual research digest side branch.
 - Intended flow: OpenClaw daily discovery -> Hermes weekly synthesis -> human-reviewed action list / Codex or Cursor execution prompt -> Hermes conclusion write-back.
 - Role split: OpenClaw is the external-world radar, Hermes is the personal knowledge base and project manager, and Codex/Cursor are engineering executors.
+- Added copyable prompt templates under `agent/research/templates/` for OpenClaw daily discovery, Hermes weekly synthesis, Codex/Cursor validation, and weekly status JSON.
 - This is intentionally separate from the coding implementation pipeline.
 - No changes were made to `agent/jobs/`, n8n workflows, Local Runner logic, provider config, credentials, gateway config, or `target-repos/*`.
 - Version 1 is file-protocol only. Prefer high-quality daily reports plus one weekly Hermes review; after three useful manual weekly reviews, consider whether n8n or Local Runner automation is justified.
