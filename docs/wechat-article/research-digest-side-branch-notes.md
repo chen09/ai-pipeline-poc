@@ -339,3 +339,43 @@ improvement, not a completed reliability fix.
 
 Article angle: operational fixes should have states beyond pass/fail. Here the
 right status is "startup blocker improved, scheduler reliability not yet proven."
+
+## Step 22: Freeze Research Mode Before Validation Mode
+
+The user clarified that the immediate goal is research, not experiments. Running
+benchmarks too early would pull the workflow into development environment
+questions, and the Mac mini may not be the right machine for every research
+topic.
+
+The workflow was therefore split explicitly:
+
+- Research Mode: investigate, synthesize, prioritize, notify, archive.
+- Validation Mode: run local/cloud experiments only after human approval.
+
+`agent/research/RUNBOOK.md` now describes the manual Research Mode flow, the
+roundup flow, and the boundary that prevents automatic escalation into
+Codex/Cursor validation.
+
+Article angle: not every good research result needs an experiment immediately.
+The valuable step is deciding whether an experiment is worth paying for.
+
+## Step 23: Run a Research Mode Roundup
+
+Hermes created `agent/research/done/2026-W20-research-mode-roundup.md` from the
+existing digital-human and local multi-agent productization artifacts.
+
+The roundup conclusion was:
+
+- Digital-human: high-quality local Mac mini route is not yet proven; keep
+  SadTalker/Wav2Lip as local baseline and treat CUDA-heavy routes as cloud or
+  observation candidates.
+- Multi-agent productization: the core risk is state handoff and governance, not
+  prompt wording.
+- Current project strategy: stabilize observability, terminal proof, and eval
+  gates before increasing automation scale.
+
+The Chinese roundup summary was sent to OpenClaw WeCom target `ChenXin`.
+
+Article angle: roundup is the missing middle step between daily research and
+engineering work. It converts scattered reports into a small set of human
+decisions.

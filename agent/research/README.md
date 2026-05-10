@@ -54,6 +54,8 @@ agent/research/
 └── templates/
 ```
 
+For manual operation, use `RUNBOOK.md`.
+
 ### `inbox/`
 
 Manual input queue for OpenClaw daily discovery reports.

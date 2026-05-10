@@ -1307,3 +1307,10 @@ MANUAL PROTOCOL ADDED
 - Hermes notification was attempted through a one-shot `origin` cron job `notify-local-multi-agent-digest-20260510` (`job_id: 801d83bacf48`) and manually triggered with `hermes cron tick`; agent logs confirmed the job entered the scheduler. Hermes gateway service still reports not running, so future automatic scheduled delivery remains unreliable until that service issue is fixed.
 - Added `agent/research/templates/wecom-digest-notification-cn.md` to standardize Chinese WeCom notifications. It keeps full execution prompts in Markdown files and sends readable conclusions, priorities, next actions, and archive paths in chat.
 - Hermes gateway launchd diagnosis: service failed when launchd wrote stdout/stderr to `/Volumes/WDC2T/Applications/hermes-home/logs/*` (`operation not permitted`). Backed up the launchd plist and wrapper, then changed launchd stdout/stderr to `~/Library/Logs/hermes-gateway-service.*.log`. After reload, the Hermes gateway service was loaded with a live PID, but Hermes CLI still warns the service definition is stale and `hermes cron status` still reports gateway not running. Treat this as improved but not fully resolved.
+
+### Research Mode Runbook + Roundup
+- Added `agent/research/RUNBOOK.md` to define manual Research Mode and explicitly separate it from Validation Mode.
+- Updated `agent/research/templates/wecom-digest-notification-cn.md` so WeCom notifications default to Chinese readable summaries and do not imply engineering validation unless the user explicitly chooses Validation Mode.
+- Hermes created `agent/research/done/2026-W20-research-mode-roundup.md` from existing digital-human and local multi-agent productization research artifacts.
+- Roundup conclusion: keep research mode for now; stabilize control-plane evidence and human-readable summaries before scaling automation or running development experiments.
+- Sent the roundup Chinese summary to OpenClaw WeCom target `ChenXin`; message id `aibot_send_msg_1778410677319_c73bea13`.
