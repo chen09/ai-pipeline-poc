@@ -1293,3 +1293,5 @@ MANUAL PROTOCOL ADDED
 - User then sent `test for new job` to OpenClaw/Hermes from WeCom. Logs identified the valid direct target as `ChenXin`.
 - Notification retry succeeded with `openclaw message send --channel wecom --account default --target ChenXin ...`; returned `chatId: ChenXin`.
 - Conclusion: manual OpenClaw -> Hermes dispatch works, and WeCom notification works when using the valid inbound direct target `ChenXin`; `self` is not a valid delivery target for this plugin.
+- Follow-up: user reported Hermes received the WeCom prompt as "Test a new periodic job." Hermes created and manually triggered cron job `test-new-job-2` (`job_id: 8dda99b6a438`) with schedule `every 1h` and delivery `origin`.
+- `hermes cron list` confirmed `test-new-job-2` is active and last run was `ok`, but also warned the Hermes gateway service is not running, so automatic future runs may not fire until the Hermes gateway service issue is fixed.

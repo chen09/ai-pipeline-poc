@@ -239,3 +239,27 @@ conversation as `chat: ChenXin user: ChenXin`. Retrying the notification with
 Article angle: the reliable way to establish a chat target is to let the user
 create an inbound conversation first, then reuse the target that the channel
 adapter actually observes. This is safer than inventing aliases like `self`.
+
+## Step 17: Correct the Hermes Inbound Diagnosis
+
+The first Codex-side observation suggested Hermes was not receiving WeCom
+messages because the foreground gateway logs did not show the user's test
+message. The user then reported the actual Hermes-side response: Hermes received
+"Test a new periodic job.", created `test-new-job-2`, and manually triggered it.
+
+`hermes cron list` confirmed the job exists:
+
+- Job id: `8dda99b6a438`
+- Name: `test-new-job-2`
+- Schedule: `every 60m`
+- Deliver: `origin`
+- Last run: `ok`
+
+The same check also warned that the Hermes gateway service is not running, which
+means the test job exists but future automatic firing depends on fixing the
+Hermes gateway service.
+
+Article angle: operator reports are first-class evidence. Local logs can be
+incomplete or pointed at the wrong process; when the user sees a successful
+agent response, the diagnosis must be revised instead of forcing the old
+interpretation.
