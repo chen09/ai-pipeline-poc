@@ -58,3 +58,37 @@ credentials, so the protocol can be reviewed safely.
 
 Article angle: examples are part of the interface. They reduce ambiguity for the
 next agent more effectively than a prose-only README.
+
+## Step 6: Clarify the Real Role Split
+
+The better mental model is not "OpenClaw reports news, Hermes is another
+agent." The stronger structure is:
+
+- OpenClaw is the external-world radar.
+- Hermes is the personal knowledge base and project manager.
+- Codex/Cursor are engineering executors.
+
+That means OpenClaw can run daily discovery across news, GitHub, papers, APIs,
+and community discussions. Hermes should not merely summarize one report; it
+should periodically synthesize multiple reports, remove duplicates, group themes,
+choose priorities, create Obsidian-ready notes, create POC action lists, and
+write execution prompts.
+
+Article angle: the pipeline becomes useful when each agent has a different
+operational posture. Radar, project manager, and executor are different roles.
+Adding more cron jobs would be weaker than making this role split explicit.
+
+## Step 7: Prefer Daily Discovery Plus Weekly Review
+
+The target operating rhythm is small, high-quality OpenClaw daily reports and a
+weekly Hermes review. The weekly review is where raw signals become project
+direction: what to try, what to watch, what to ignore, and what to hand to
+Codex/Cursor for verification.
+
+After Codex/Cursor executes a selected validation task, Hermes should write back
+the conclusion and the next step. That write-back closes the loop and prevents
+research from becoming a pile of disconnected links.
+
+Article angle: the important loop is not "search automatically." It is
+"discover, synthesize, validate, write back." The write-back step is what turns
+research into accumulated judgment.

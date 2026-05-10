@@ -11,10 +11,20 @@ files, or outputs in `agent/jobs/`.
 
 - OpenClaw owns discovery: daily reports, web search, GitHub activity, papers,
   API changes, demos, and community discussions.
-- Hermes owns digestion: deduplication, grouping, priority judgment, action
-  checklist generation, and execution prompts for Codex or Cursor.
+- Hermes owns digestion and landing: weekly synthesis across multiple OpenClaw
+  reports, deduplication, grouping, priority judgment, Obsidian note generation,
+  POC action checklist generation, execution prompts for Codex or Cursor, and
+  conclusion write-back after validation.
+- Codex and Cursor own engineering execution and verification when a digest item
+  becomes an implementation task.
 - WeCom is only a notification and human command surface. It is not a reliable
   machine queue and should not be treated as the source of truth.
+
+In short:
+
+- OpenClaw is the external-world radar.
+- Hermes is the personal knowledge base and project manager.
+- Codex/Cursor are engineering executors.
 
 ## Version 1 Scope
 
@@ -25,8 +35,12 @@ Version 1 is a manual file protocol only.
 - No automatic scheduling or polling.
 - No provider, credential, launchd, or gateway changes.
 
-After this protocol works cleanly for three manual runs, consider whether to add
-n8n or Local Runner automation.
+The intended operating rhythm is a small number of high-quality daily discovery
+reports plus one weekly Hermes review. This is steadier than adding many cron
+jobs before the research loop is understood.
+
+After this protocol works cleanly for three manual weekly reviews, consider
+whether to add n8n or Local Runner automation.
 
 ## Directory Protocol
 
@@ -41,7 +55,7 @@ agent/research/
 
 ### `inbox/`
 
-Manual input queue for OpenClaw discovery reports.
+Manual input queue for OpenClaw daily discovery reports.
 
 Filename:
 
@@ -55,6 +69,8 @@ Example:
 agent/research/inbox/2026-05-10-digital-human-openclaw.md
 ```
 
+Multiple daily reports can feed one weekly Hermes review.
+
 ### `processing/`
 
 Manual status files for Hermes digest work in progress.
@@ -65,15 +81,24 @@ Filename:
 agent/research/processing/{date}-{topic}.status.json
 ```
 
+For weekly synthesis, use:
+
+```text
+agent/research/processing/{week}-{topic}.status.json
+```
+
 Suggested minimal fields:
 
 ```json
 {
   "state": "processing",
   "owner": "hermes",
-  "input": "agent/research/inbox/2026-05-10-digital-human-openclaw.md",
+  "inputs": [
+    "agent/research/inbox/2026-05-10-digital-human-openclaw.md",
+    "agent/research/inbox/2026-05-11-digital-human-openclaw.md"
+  ],
   "updated_at": "2026-05-10T00:00:00Z",
-  "notes": "Deduplicating sources and grouping findings."
+  "notes": "Deduplicating daily reports and grouping weekly priorities."
 }
 ```
 
@@ -85,6 +110,12 @@ Filename:
 
 ```text
 agent/research/done/{date}-{topic}-hermes-digest.md
+```
+
+For weekly synthesis, use:
+
+```text
+agent/research/done/{week}-{topic}-hermes-weekly-digest.md
 ```
 
 ### `archive/`
@@ -101,12 +132,17 @@ private source material.
 
 ## Expected Manual Flow
 
-1. OpenClaw writes a daily discovery report to `inbox/`.
-2. Hermes creates or updates a matching status file in `processing/`.
-3. Hermes writes the final digest to `done/`.
-4. A human reviews the digest and decides whether to turn the execution prompt
-   into a Codex/Cursor task.
-5. Old artifacts can be moved to `archive/` when they are no longer active.
+1. OpenClaw writes daily discovery reports to `inbox/`.
+2. Hermes reads several OpenClaw reports during a weekly review.
+3. Hermes creates or updates a matching status file in `processing/`.
+4. Hermes writes the weekly digest, Obsidian-ready notes, POC action checklist,
+   and Codex/Cursor execution prompts to `done/`.
+5. A human reviews the digest and chooses which execution prompt should become a
+   Codex/Cursor task.
+6. Codex/Cursor executes the selected validation task.
+7. Hermes writes back the validation conclusion and next step in the next digest
+   or a follow-up note.
+8. Old artifacts can be moved to `archive/` when they are no longer active.
 
 ## Hermes Digest Shape
 
@@ -114,8 +150,11 @@ Each digest should include:
 
 - One-sentence conclusion.
 - Deduplicated key findings.
+- Obsidian-ready note summary.
+- POC action checklist.
 - Worth trying.
 - Watching.
 - Not investing now.
 - Execution prompt for Codex/Cursor.
+- Validation conclusion and next-step write-back, when a prior action was run.
 - Sources and uncertainty notes.
